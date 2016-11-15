@@ -1,0 +1,41 @@
+Here is the base code for the Monster Dash project.  The Makefile should be
+sufficient to outline where things are but here's a high-level overview:
+
+* inc/       : Include directory for all the game related include files
+* obj/       : Directory where object files are stored
+* src/       : Directory for all the game related source files
+* Monster/   : Directory for all the monster related files (source and include)
+* Player/    : Directory for all the player related files (source and include)
+* Playfields : Directory for the playfields.
+* Makefile   : Makefile for the project
+
+There are two build targets defined in the makefile:
+
+   * make
+   * make debug
+
+Which will do the expected things.
+
+To run the program, compile and run specifying the playfield to use:
+
+make
+main Playfields/A.in
+
+You can add an optional commandline parameter which will introduce a delay
+between turns so that the monster and player behavior can be better viewed.
+
+main Playfields/B.in 1000
+
+The delay parameter is specified in terms of milliseconds.
+
+The game code is set up to run lots of head-to-head trials so the output is
+formatted to be parsable.  After a run the results message will be written to
+a file named ResultsFile.txt.  You may want to change those messages for
+development purposes but do not change exposed interfaces in the game code
+(site, game, playfield, util, callbacks, etc.)
+
+The code for your monster and player should all reside in the Monster and
+Player directories (respectively).  The tournament is run by grabbing a monster
+and a player implementation, adding the common game code, compiling and running
+against one or more Playfields.  If you have multiple player/monsters, you
+can easily change the Makefile to accommodate that.

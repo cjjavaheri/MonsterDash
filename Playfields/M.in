@@ -1,0 +1,17 @@
+12 240
+        . . . . . . . .
+    + + . . . . . . . .
+    +   . . . . . . . .
+    +             +     
+. . . . . . L     + + +
+. . . . . . .         +
+. . . . . . .         +
+. . . . . . .         +
+. . . . . . .         +
+. . . . . . . + + + + +          
+. . . . . . .          
+. . . . . @ . + + + + +
+
+Rogue can stay alive indefinitely, but optimal strategy involves
+moving toward the monster for the first two steps.
+
