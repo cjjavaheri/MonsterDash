@@ -23,7 +23,7 @@ class Playfield
       bool isRoom(const unsigned int x, const unsigned int y) const;
       bool isWall(const Site *v) const ;
       bool isWall(const unsigned int x, const unsigned int y) const;
-      bool isLegalMove(const Site* v, const Site* w);
+      bool isLegalMove(const Site* v, const Site* w) const;
       void setPlayerSite(const Site *v);
       void setMonsterSite(const Site *v);
       const Site* getPlayerSite() const { return playerSite ; }
