@@ -116,7 +116,7 @@ bool Playfield::isWall(const unsigned int i, const unsigned int j) const
  *
  * @param[in] v - the site to query about wallness
  *****************************************************************************/
-bool Playfield::isLegalMove(const Site* v, const Site* w)
+bool Playfield::isLegalMove(const Site* v, const Site* w) const
 {
    unsigned int i1 = v->i();
    unsigned int j1 = v->j();
