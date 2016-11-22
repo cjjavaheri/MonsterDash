@@ -25,6 +25,11 @@ void Game::readFile(const char *fileName)
 {
    int N;
    ifstream fin(fileName);
+   if (!fin.is_open())
+   {
+      cerr << "Cannot open file " << fileName << " for reading.\n";
+      exit(-1);
+   }
    fin >> N >> winMoves;
    cout << "Winning Moves: " << winMoves << endl;
    char **board = new char*[N];
