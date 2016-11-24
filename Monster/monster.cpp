@@ -16,6 +16,7 @@ const Site* Monster::move()
    const Site* monster   = playfield->getMonsterSite();
    const Site* player = playfield->getPlayerSite();
    const Site* test;
+   Site* nextMove;
    int i;
    int j;
    cout << "Monster[i][j] " << monster->i() << " " << monster->j() << endl;
@@ -26,11 +27,14 @@ const Site* Monster::move()
 
 	bfs(marked, prev, dist, monster);
 
-	i = player->i();
-	j = player->j();
+	nextMove = getNextMove(marked, prev, dist, monster, player);
 
-	test = prev[i][j];
-	cout << test->i() << " " << test->j() << endl;
+	test = new Site(nextMove->i(), nextMove->j());
+	deallocateStorage(marked, prev, dist);
+	return test;
+
+	/*
+
 
 	if (playfield->isRoom(monster) == true)
 	{
@@ -42,6 +46,8 @@ const Site* Monster::move()
 		test = moveCorridor(monster, player);
 		return test;
 	}
+
+	*/
 
 
    return nullptr;
@@ -307,6 +313,28 @@ const Site* Monster::moveCorridor(const Site* monster, const Site* player)
 		return test;
 }
 
+ Site* Monster::getNextMove(bool **&marked, Site* **&prev, int **&dist, const Site* monster, const Site* player)
+{
+	unsigned int i;
+	unsigned int j;
+	Site* nextMove = nullptr;
+	Site* temp = nullptr;
+
+	i = player->i();
+	j = player->j();
+
+	while (dist[i][j] != 1)
+	{
+		nextMove = prev[i][j];
+		i = nextMove->i();
+		j = nextMove->j();
+	}
+
+	return nextMove;
+
+
+}
+
 
 void Monster::bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monster)
 {
@@ -337,6 +365,8 @@ void Monster::bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monste
 			checkAdjacentCorridorSquares(marked, prev, dist, myqueue, temp);
 
 	}
+
+	delete monsterSite;
 
 }
 
@@ -491,6 +521,28 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
 			}
 
 			checkAdjacentCorridorSquares(marked, prev, dist, myqueue, temp);
+
+}
+
+void Monster::deallocateStorage(bool **&marked, Site* **&prev, int **&dist)
+{
+	int i;
+	int j;
+
+	for (i = 0; i < N; i++)
+		delete[] marked[i];
+
+	delete[] marked;
+
+	for (i = 0; i < N; i++)
+		delete[] prev[i];
+
+	delete[] prev;
+
+	for (i = 0; i < N; i++)
+		delete[] dist[i];
+
+	delete[] dist;
 
 }
 

@@ -18,10 +18,14 @@ class Monster
        const Site* moveCorridor(const Site* monster, const Site* player);
        void bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monster);
        void allocateStorage(bool **&marked, Site* **&prev, int **&dist);
+       void deallocateStorage(bool **&marked, Site* **&prev, int **&dist);
        void checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, queue<Site*> &myqueue, Site* temp);
 
 
 	void checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **dist, queue<Site*> &myqueue, Site* temp);
+
+
+	 Site* getNextMove(bool **&marked, Site* **&prev, int **&dist, const Site* monster, const Site* player);
 };
 
 #endif
