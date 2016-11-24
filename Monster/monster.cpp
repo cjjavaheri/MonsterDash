@@ -17,8 +17,6 @@ const Site* Monster::move()
    const Site* player = playfield->getPlayerSite();
    const Site* test;
    Site* nextMove;
-   int i;
-   int j;
    cout << "Monster[i][j] " << monster->i() << " " << monster->j() << endl;
    cout << "PLayer[i][j] " << player->i() << " " << player->j() << endl;
    cout << endl << endl;
@@ -318,19 +316,31 @@ const Site* Monster::moveCorridor(const Site* monster, const Site* player)
 	unsigned int i;
 	unsigned int j;
 	Site* nextMove = nullptr;
-	Site* temp = nullptr;
 
 	i = player->i();
 	j = player->j();
 
-	while (dist[i][j] != 1)
+	// Starting distance is not 1
+	if (dist[i][j] != 1)
 	{
-		nextMove = prev[i][j];
-		i = nextMove->i();
-		j = nextMove->j();
+
+		while (dist[i][j] != 1)
+		{
+			nextMove = prev[i][j];
+			i = nextMove->i();
+			j = nextMove->j();
+		}
+		return nextMove;
+
 	}
 
-	return nextMove;
+	// Starting distance is 1 ; therefore, the monster only has to take
+	// one more move to reach the player.
+	else
+	{
+		nextMove = prev[i][j];
+		return nextMove;
+	}
 
 
 }
@@ -527,7 +537,6 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
 void Monster::deallocateStorage(bool **&marked, Site* **&prev, int **&dist)
 {
 	int i;
-	int j;
 
 	for (i = 0; i < N; i++)
 		delete[] marked[i];
