@@ -13,8 +13,8 @@ class Monster
     public:
        Monster(Playfield* play);
        const Site* move();
-       Site* moveRoom(const Site* monster, const Site* player);
-       Site* moveCorridor(const Site* monster, const Site* player);
+       const Site* moveRoom(const Site* monster, const Site* player);
+       const Site* moveCorridor(const Site* monster, const Site* player);
 };
 
 #endif

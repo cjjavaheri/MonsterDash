@@ -12,7 +12,7 @@ const Site* Monster::move()
 {
    const Site* monster   = playfield->getMonsterSite();
    const Site* player = playfield->getPlayerSite();
-   Site* test;
+   const Site* test;
    cout << "Monster[i][j] " << monster->i() << " " << monster->j() << endl;
    cout << "PLayer[i][j] " << player->i() << " " << player->j() << endl;
    cout << endl << endl;
@@ -53,9 +53,9 @@ const Site* Monster::move()
 
 
 
-Site* Monster::moveRoom(const Site* monster, const Site* player)
+const Site* Monster::moveRoom(const Site* monster, const Site* player)
 {
-	Site* test = nullptr;
+	const Site* test = monster;
 
 			// Monster's row is smaller than player's row
 		if (monster->i() < player->i())
@@ -75,6 +75,12 @@ Site* Monster::moveRoom(const Site* monster, const Site* player)
 					return test;
 				}
 				
+				test = new Site(monster->i() , monster->j() + 1);
+				if (playfield->isLegalMove(monster, test))
+				{
+					return test;
+				}
+
 				test = new Site(monster->i() , monster->j() + 1);
 				if (playfield->isLegalMove(monster, test))
 				{
@@ -199,12 +205,14 @@ Site* Monster::moveRoom(const Site* monster, const Site* player)
 				}
 			}
 		}
+		test = monster;
+		return test;
 
 }
 
-Site* Monster::moveCorridor(const Site* monster, const Site* player)
+const Site* Monster::moveCorridor(const Site* monster, const Site* player)
 {
-	Site* test = nullptr;
+	const Site* test = monster;
 			// Monster's row is smaller than player's row
 		if (monster->i() < player->i())
 		{
@@ -279,5 +287,6 @@ Site* Monster::moveCorridor(const Site* monster, const Site* player)
 					return test;
 			}
 		}
-
+		test = monster;
+		return test;
 }
