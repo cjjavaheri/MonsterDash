@@ -10,12 +10,12 @@ class Monster
 {
     Playfield* playfield;
     int N;
+    const Site* tryMove;
  
     public:
        Monster(Playfield* play);
+	~Monster();
        const Site* move();
-       const Site* moveRoom(const Site* monster, const Site* player);
-       const Site* moveCorridor(const Site* monster, const Site* player);
        void bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monster);
        void allocateStorage(bool **&marked, Site* **&prev, int **&dist);
        void deallocateStorage(bool **&marked, Site* **&prev, int **&dist);
