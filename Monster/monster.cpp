@@ -33,6 +33,13 @@ const Site* Monster::move()
 	// Perform a breadth-first-search on the playfield.
 	bfs(marked, prev, dist, monster, allocatedMemory);
 
+	// Check to make sure a path exists to the player.
+	if (!marked[player->i()][player->j()])
+	{
+		deallocateStorage(marked, prev, dist, allocatedMemory);
+		return monster;
+	}
+
 	// Calculate the next move on the shortest path the monster needs to take.
 	nextMove = getNextMove(marked, prev, dist, monster, player, allocatedMemory);
 
@@ -46,7 +53,9 @@ const Site* Monster::move()
 	if (playfield->isLegalMove(monster, tryMove))
 		return tryMove;
 
-   return nullptr;
+	return nullptr;
+
+
 }
 
 
