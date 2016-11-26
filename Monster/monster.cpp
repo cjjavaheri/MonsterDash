@@ -27,16 +27,22 @@ const Site* Monster::move()
    cout << "PLayer[i][j] " << player->i() << " " << player->j() << endl;
    cout << endl << endl;
 
+	// Create the 2D arrays needed for bfs.
 	allocateStorage(marked, prev, dist);
 
+	// Perform a breadth-first-search on the playfield.
 	bfs(marked, prev, dist, monster, allocatedMemory);
 
+	// Calculate the next move on the shortest path the monster needs to take.
 	nextMove = getNextMove(marked, prev, dist, monster, player, allocatedMemory);
 
+	// Create the pointer to the next move.
 	tryMove = new Site(nextMove->i(), nextMove->j());
 
+	// Free up any allocated memory used.
 	deallocateStorage(marked, prev, dist, allocatedMemory);
 
+	//Make sure the move is legal.
 	if (playfield->isLegalMove(monster, tryMove))
 		return tryMove;
 
@@ -111,6 +117,7 @@ void Monster::bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monste
 
 	}
 
+	// Store monsterSite in order to free the memory later.
 	allocatedMemory.push_back(monsterSite);
 
 }
@@ -122,6 +129,9 @@ void Monster::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **di
 			Site* addSite = nullptr;
 			i = temp->i();
 			j = temp->j();
+
+			// Check all 4 horizontal and vertical sites.
+			// First, check upper vertical site.
 			if (!playfield->isWall(i - 1, j))
 			{
 				if (playfield->isRoom(i - 1, j) || playfield->isCorridor(i - 1, j))
@@ -139,7 +149,7 @@ void Monster::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **di
 			}
 
 
-
+			//Next, check lower vertical site.
 			if (!playfield->isWall(i + 1, j))
 			{
 				if (playfield->isRoom(i + 1, j) || playfield->isCorridor(i + 1, j))
@@ -157,7 +167,7 @@ void Monster::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **di
 			}
 
 
-
+			// Next, check the right horizontal site.
 			if (!playfield->isWall(i, j + 1))
 			{
 				if (playfield->isRoom(i, j + 1) || playfield->isCorridor(i, j + 1))
@@ -175,7 +185,7 @@ void Monster::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **di
 			}
 
 
-
+			//Finally, check the left horizontal site.
 			if (!playfield->isWall(i, j - 1))
 			{
 				if (playfield->isRoom(i, j - 1) || playfield->isCorridor(i, j - 1))
@@ -202,6 +212,9 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
 			int j;
 			i = temp->i();
 			j = temp->j();
+
+			// Check all 4 diagonal sites.
+			// First check lower right diagonal
 			if (!playfield->isWall(i + 1, j + 1))
 			{
 				if (playfield->isRoom(i + 1, j + 1))
@@ -219,7 +232,7 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
 			}
 
 
-
+			// Next check lower left diagonal
 			if (!playfield->isWall(i + 1, j - 1))
 			{
 				if (playfield->isRoom(i + 1, j - 1))
@@ -237,7 +250,7 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
 			}
 
 
-
+			// Next check upper right diagonal
 			if (!playfield->isWall(i - 1, j + 1))
 			{
 				if (playfield->isRoom(i - 1, j + 1))
@@ -256,7 +269,7 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
 
 
 
-
+			// Finally check upper left diagonal
 			if (!playfield->isWall(i - 1, j - 1))
 			{
 				if (playfield->isRoom(i - 1, j - 1))
@@ -273,6 +286,7 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
 				}
 			}
 
+			// Now check the horizontal and vertical sites.
 			checkAdjacentCorridorSquares(marked, prev, dist, myqueue, temp, allocatedMemory);
 
 }
@@ -282,6 +296,7 @@ void Monster::deallocateStorage(bool **&marked, Site* **&prev, int **&dist, vect
 	int i;
 	vector<Site*>::iterator it;
 
+	// Free all of the 2D arrays.
 	for (i = 0; i < N; i++)
 		delete[] marked[i];
 
@@ -297,6 +312,7 @@ void Monster::deallocateStorage(bool **&marked, Site* **&prev, int **&dist, vect
 
 	delete[] dist;
 
+	// Free all allocated site pointers.
 	it = allocatedMemory.begin();
 	while (it != allocatedMemory.end())
 	{
@@ -311,19 +327,22 @@ void Monster::allocateStorage(bool **&marked, Site* **&prev, int **&dist)
 	int i;
 	int j;
 
+	// Create a 2D array of distances between monster and other vertices.
 	dist = new (nothrow) int *[N];
 	for (i = 0; i < N; i++)
 		dist[i] = new (nothrow) int [N];
 
+	// Create a 2D array of previous site pointers.
 	prev = new (nothrow) Site* *[N];
 	for (i = 0; i < N; i++)
 		prev[i] = new (nothrow) Site* [N];
 
-
+	// Create a 2D array of bools to mark visited vertices.
 	marked = new (nothrow) bool *[N];
 	for (i = 0; i < N; i++)
 		marked[i] = new (nothrow) bool [N];
 
+	// Initialize them all as false.
 	for (i = 0; i < N; i++)
 		for (j = 0; j < N; j++)
 			marked[i][j] = false;
