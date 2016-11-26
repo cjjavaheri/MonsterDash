@@ -8,7 +8,6 @@ Monster::Monster(Playfield* p)
 
 Monster::~Monster()
 {
-	delete tryMove;
 
 }
 
@@ -22,6 +21,7 @@ const Site* Monster::move()
    const Site* monster   = playfield->getMonsterSite();
    const Site* player = playfield->getPlayerSite();
    Site* nextMove;
+   const Site* tryMove;
    cout << "Monster[i][j] " << monster->i() << " " << monster->j() << endl;
    cout << "PLayer[i][j] " << player->i() << " " << player->j() << endl;
    cout << endl << endl;
@@ -34,7 +34,8 @@ const Site* Monster::move()
 
 	tryMove = new Site(nextMove->i(), nextMove->j());
 	deallocateStorage(marked, prev, dist);
-	return tryMove;
+	if (playfield->isLegalMove(monster, tryMove))
+		return tryMove;
 
    return nullptr;
 }
@@ -68,7 +69,7 @@ const Site* Monster::move()
 	// one more move to reach the player.
 	else
 	{
-		nextMove = prev[i][j];
+		nextMove = new Site(player->i(), player->j());
 		return nextMove;
 	}
 

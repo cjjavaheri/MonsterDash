@@ -10,7 +10,6 @@ class Monster
 {
     Playfield* playfield;
     int N;
-    const Site* tryMove;
  
     public:
        Monster(Playfield* play);
