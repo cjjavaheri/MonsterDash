@@ -35,5 +35,13 @@ class Player
        Site* getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&distMonster, bool **&markedPlayer, Site* **&prevPlayer, int **&distPlayer, const Site* monster, const Site* player, vector<Site*> &allocatedMemory, map<Site*, vector<Site*>> &adj);
 
 
+
+	Site* findCorridorCycle(map<Site*, vector<Site*>> &adj, int **&distMonster, vector<Site*> &allocatedMemory, vector<Site*> &cycle, Site* &start, const Site* player);
+
+
+
+	Site* returnToStart(map<Site*, vector<Site*>> &adj, int **&distPlayer, Site* **&prevPlayer, vector<Site*> &allocatedMemory, Site* &start, const Site* player);
+
+
 };
 #endif
