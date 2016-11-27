@@ -167,15 +167,20 @@ vector<Site*> Player::findCorridors(vector<Site*> &corridors)
 {
         unsigned int i;
         unsigned int j;
+	unsigned int a;
+	unsigned int b;
 	int longestDist;
 	int shortestDist;
 	map<Site*, vector<Site*>>::iterator it;
 	vector<Site*> adjVect;
 	vector<Site*>::iterator vectIt;
 	Site* nextMove = nullptr;
+	static Site* start = nullptr;
+	static vector<Site*> cycle;
 
 	longestDist = distMonster[player->i()][player->j()];
 	nextMove = new Site(player->i(), player->j());
+	allocatedMemory.push_back(nextMove);
 
 	i = player->i();
 	j = player->j();
@@ -190,6 +195,7 @@ vector<Site*> Player::findCorridors(vector<Site*> &corridors)
 
 		adjVect = it->second;
 		vectIt = adjVect.begin();
+
 		while (vectIt != adjVect.end())
 		{
 			if (distMonster[(*vectIt)->i()][(*vectIt)->j()] > longestDist)
@@ -200,62 +206,129 @@ vector<Site*> Player::findCorridors(vector<Site*> &corridors)
 
 			vectIt++;
 		}
-
+	
+		if (nextMove->i() == i && nextMove->j() == j)
+		{
+			for (a = player->i() - 1; a < player->i() + 2; a++)
+				for (b = player->j() - 1; b < player->j() + 2; b++)
+				{
+					if (a == player->i() || b == player->j())
+					{
+						if (playfield->isRoom(a, b))
+						{
+							nextMove = new Site(a, b);
+							allocatedMemory.push_back(nextMove);
+							if (start == nullptr)
+							{
+								start = cycle.front();
+								start = new Site(start->i(), start->j());
+							}
+							cycle.clear();
+						}
+					}
+				}
+		}
+		cycle.push_back(nextMove);
 		return nextMove;
 	}
 
 	if (playfield->isRoom(player))
 	{
 
-		it = adj.begin();
-		shortestDist = distPlayer[(it->first)->i()][(it->first)->j()];
-		nextMove = new Site((it->first)->i(), (it->first)->j());
-
-		while (it != adj.end() && ((it->first)->i() != i || (it->first)->j() != j))
+		if (start == nullptr)
 		{
-			if (distPlayer[(it->first)->i()][(it->first)->j()] < shortestDist)
+			it = adj.begin();
+			shortestDist = distPlayer[(it->first)->i()][(it->first)->j()];
+			nextMove = new Site((it->first)->i(), (it->first)->j());
+			allocatedMemory.push_back(nextMove);
+
+			while (it != adj.end() && ((it->first)->i() != i || (it->first)->j() != j))
 			{
-				shortestDist = distPlayer[(it->first)->i()][(it->first)->j()];
-				nextMove = new Site((it->first)->i(), (it->first)->j());
-			}
+				if (distPlayer[(it->first)->i()][(it->first)->j()] < shortestDist)
+				{
+					shortestDist = distPlayer[(it->first)->i()][(it->first)->j()];
+					nextMove = new Site((it->first)->i(), (it->first)->j());
+					allocatedMemory.push_back(nextMove);
+				}
 			it++;
-		}
-		
-	}
+			}
 
-	i = nextMove->i();
-	j = nextMove->j();
-
-	
-	// Starting distance is not 1
-	if (distPlayer[i][j] != 1)
-	{
-
-		while (distPlayer[i][j] != 1)
-		{
-			nextMove = prevPlayer[i][j];
 			i = nextMove->i();
 			j = nextMove->j();
+
+	
+			// Starting distance is not 1
+			if (distPlayer[i][j] != 1)
+			{
+
+				while (distPlayer[i][j] != 1)
+				{
+					nextMove = prevPlayer[i][j];
+					i = nextMove->i();
+					j = nextMove->j();
+				}
+				return nextMove;
+
+			}
+
+			// Starting distance is 1 ; therefore, the monster only has to take
+			// one more move to reach the player.
+			else
+			{
+		
+				/*
+				nextMove = new Site(player->i(), player->j());
+				allocatedMemory.push_back(nextMove);
+				*/
+		
+				return nextMove;
+			}
+
 		}
-		return nextMove;
 
-	}
+		else if (start != nullptr)
+		{
+			
 
-	// Starting distance is 1 ; therefore, the monster only has to take
-	// one more move to reach the player.
-	else
-	{
+			nextMove = start;
+			i = start->i();
+			j = start->j();
+
+	
+			// Starting distance is not 1
+			if (distPlayer[i][j] != 1)
+			{
+
+				while (distPlayer[i][j] != 1)
+				{
+					nextMove = prevPlayer[i][j];
+					i = nextMove->i();
+					j = nextMove->j();
+				}
+
+				return nextMove;
+
+			}
+
+			// Starting distance is 1 ; therefore, the monster only has to take
+			// one more move to reach the player.
+			else
+			{
 		
-		/*
-		nextMove = new Site(player->i(), player->j());
-		allocatedMemory.push_back(nextMove);
-		*/
+				/*
+				nextMove = new Site(player->i(), player->j());
+				allocatedMemory.push_back(nextMove);
+				*/
 		
-		return nextMove;
+				return nextMove;
+			}
+
+
+		}
+
+		
+		
 	}
-
-
-	return nextMove;
 
 
 }
