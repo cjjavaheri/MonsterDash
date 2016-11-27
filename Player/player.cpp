@@ -176,7 +176,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 	nextMove = new Site(player->i(), player->j());
 	allocatedMemory.push_back(nextMove);
 
-	hasCorridors = doCorridorsExist(adj);
+	hasCorridors = doCorridorsExist();
 
 	if (!hasCorridors)
 	{
@@ -253,22 +253,19 @@ bool Player::doWallsExist()
 
 }
 
-bool Player::doCorridorsExist(map<Site*, vector<Site*>> &adj)
+bool Player::doCorridorsExist()
 {
-	map<Site*, vector<Site*>>::iterator it;
+	int i;
+	int j;
 	bool corridors = false;
 
-	// Check if there are any corridors in the graph.
-	it = adj.begin();
-	while (it != adj.end())
-	{
-		if (!it->second.empty())
-			corridors = true;
-
-		it++;
-	}
+	for (i = 0; i < N; i++)
+		for (j = 0; j < N; j++)
+			if (playfield->isCorridor(i, j))
+				corridors = true;
 
 	return corridors;
+
 }
 
 Site* Player::returnToStart(map<Site*, vector<Site*>> &adj, int **&distPlayer, Site* **&prevPlayer, vector<Site*> &allocatedMemory, Site* &start, const Site* player)
