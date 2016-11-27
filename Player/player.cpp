@@ -436,12 +436,16 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> &adj, int **&distMonst
                         nextMove = new Site(a, b);
                         allocatedMemory.push_back(nextMove);
 				// Initialize start to starting corridor site of cycle.
-                        if (start == nullptr)
+                        if (start == nullptr && !cycle.empty())
                         {
                             start = cycle.front();
                             start = new Site(start->i(), start->j());
+			    cycle.clear();
                         }
-                        cycle.clear();
+                        if (cycle.empty())
+			{
+				return nextMove;
+			}
                     }
                 }
             }
