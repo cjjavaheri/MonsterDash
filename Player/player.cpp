@@ -217,15 +217,20 @@ Site* Player::keepDistance(int **&distMonster, const Site* player, vector<Site*>
 	unsigned int j;
 	int longestDist = distMonster[player->i()][player->j()];
 	Site* nextMove = new Site(player->i(), player->j());
+	allocatedMemory.push_back(nextMove);
 	
 	// Calculate longest path for monster. Assumes continuity between room sites.
 	for (i = player->i() - 1; i < player->i() + 2; i++)
 		for (j = player->j() - 1; j < player->j() + 2; j++)
-			if (distMonster[i][j] > longestDist)
+			if (playfield->isRoom(i, j))
 			{
-				longestDist = distMonster[i][j];
-				nextMove = new Site(i, j);
+				if (distMonster[i][j] > longestDist)
+				{
+					longestDist = distMonster[i][j];
+					nextMove = new Site(i, j);
+					allocatedMemory.push_back(nextMove);
 				
+				}
 			}
 
 	return nextMove;
