@@ -42,6 +42,11 @@ class Player
 
 	Site* returnToStart(map<Site*, vector<Site*>> &adj, int **&distPlayer, Site* **&prevPlayer, vector<Site*> &allocatedMemory, Site* &start, const Site* player);
 
+	bool doCorridorsExist(map<Site*, vector<Site*>> &adj);
+
+	bool doWallsExist();
+
+	Site* keepDistance(int **&distMonster, const Site* player, vector<Site*> &allocatedMemory);
 
 };
 #endif

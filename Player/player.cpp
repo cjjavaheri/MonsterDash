@@ -170,6 +170,30 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     Site* nextMove = nullptr;
     static Site* start = nullptr;
     static vector<Site*> cycle;
+    bool hasCorridors;
+    bool hasWalls;
+
+	nextMove = new Site(player->i(), player->j());
+	allocatedMemory.push_back(nextMove);
+
+	hasCorridors = doCorridorsExist(adj);
+
+	if (!hasCorridors)
+	{
+		if (!markedPlayer[monster->i()][monster->j()])
+			return nextMove;
+
+		else
+		{
+			hasWalls = doWallsExist();
+			if (!hasWalls)
+			{
+				nextMove = keepDistance(distMonster, player, allocatedMemory);
+				return nextMove;
+			}
+		}
+	}
+
 
     if (playfield->isCorridor(player))
     {
@@ -185,6 +209,61 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     }
 
 
+}
+
+Site* Player::keepDistance(int **&distMonster, const Site* player, vector<Site*> &allocatedMemory)
+{
+	unsigned int i;
+	unsigned int j;
+	int longestDist = distMonster[player->i()][player->j()];
+	Site* nextMove = new Site(player->i(), player->j());
+	
+	// Calculate longest path for monster. Assumes continuity between room sites.
+	for (i = player->i() - 1; i < player->i() + 2; i++)
+		for (j = player->j() - 1; j < player->j() + 2; j++)
+			if (distMonster[i][j] > longestDist)
+			{
+				longestDist = distMonster[i][j];
+				nextMove = new Site(i, j);
+				
+			}
+
+	return nextMove;
+		
+
+}
+
+bool Player::doWallsExist()
+{
+	int i;
+	int j;
+	bool walls = false;
+
+	for (i = 0; i < N; i++)
+		for (j = 0; j < N; j++)
+			if (playfield->isWall(i, j))
+				walls = true;
+
+	return walls;
+
+}
+
+bool Player::doCorridorsExist(map<Site*, vector<Site*>> &adj)
+{
+	map<Site*, vector<Site*>>::iterator it;
+	bool corridors = false;
+
+	// Check if there are any corridors in the graph.
+	it = adj.begin();
+	while (it != adj.end())
+	{
+		if (!it->second.empty())
+			corridors = true;
+
+		it++;
+	}
+
+	return corridors;
 }
 
 Site* Player::returnToStart(map<Site*, vector<Site*>> &adj, int **&distPlayer, Site* **&prevPlayer, vector<Site*> &allocatedMemory, Site* &start, const Site* player)
