@@ -211,7 +211,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
         if (disc != 0)
         {
             adjDisc = getAdjListDisc(adj, allocatedMemory);
-            return calculateNextRoom(adjDisc, distMonster, distPlayer, prevPlayer, player);
+            return calculateNextRoom(adjDisc, distMonster, distPlayer, prevPlayer, player, monster);
 
         }
     }
@@ -235,7 +235,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
 }
 
-Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player)
+Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
 {
     unsigned int i;
     unsigned int j;
@@ -254,6 +254,12 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
     if (playfield->isCorridor(player->i(), player->j()))
     {
         nearestCorr = new Site(player->i(), player->j());
+        cycle.push_back(nearestCorr);
+    }
+
+    if (playfield->isCorridor(monster->i(), monster->j()))
+    {
+        nearestCorr = new Site(monster->i(), monster->j());
         cycle.push_back(nearestCorr);
     }
 
