@@ -248,55 +248,8 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 	vector<Site*>::iterator eraseVect;
 	Site* nearestCorr;
 	static vector<Site*> cycle;
-	Site* prevMove;
-	Site* test;
-	bool exist = false;
 
-	it = adjDisc.begin();
-	while (it != adjDisc.end())
-	{
-		if (it->second.size() <= 1)
-		{
-			eraseMap = it;
-			++it;
-			adjDisc.erase(eraseMap);
-		}
-		else
-			it++;
-		
-	}
-
-	it = adjDisc.begin();
-	while (it != adjDisc.end())
-	{
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			exist = false;
-			test = *vectIt;
-			i = test->i();
-			j = test->j();
-			mapIt = adjDisc.begin();
-			while (mapIt != adjDisc.end())
-			{
-				if (i == mapIt->first->i() && j == mapIt->first->j())
-					exist = true;
-				mapIt++;
-			}
-
-			if (!exist)
-			{
-				eraseVect = vectIt;
-				++vectIt;
-				(it->second).erase(eraseVect);
-			}
-
-			else
-				vectIt++;
-		}
-
-		++it;
-	}
+	removeDeadEndVertices(adjDisc);
 
 	//if (cycle.empty())
 	//{
@@ -372,6 +325,67 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 	    cycle.push_back(nearestCorr);
             return nearestCorr;
         }
+
+}
+
+void Player::removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc)
+{
+	map<Site*, vector<Site*>>::iterator it;
+	map<Site*, vector<Site*>>::iterator eraseMap;
+	map<Site*, vector<Site*>>::iterator mapIt;
+	vector<Site*>::iterator vectIt;
+	vector<Site*>::iterator eraseVect;
+	Site* test;
+	unsigned int i;
+	unsigned int j;
+	bool exist;
+
+
+		it = adjDisc.begin();
+	while (it != adjDisc.end())
+	{
+		if (it->second.size() <= 1)
+		{
+			eraseMap = it;
+			++it;
+			adjDisc.erase(eraseMap);
+		}
+		else
+			it++;
+		
+	}
+
+	it = adjDisc.begin();
+	while (it != adjDisc.end())
+	{
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			exist = false;
+			test = *vectIt;
+			i = test->i();
+			j = test->j();
+			mapIt = adjDisc.begin();
+			while (mapIt != adjDisc.end())
+			{
+				if (i == mapIt->first->i() && j == mapIt->first->j())
+					exist = true;
+				mapIt++;
+			}
+
+			if (!exist)
+			{
+				eraseVect = vectIt;
+				++vectIt;
+				(it->second).erase(eraseVect);
+			}
+
+			else
+				vectIt++;
+		}
+
+		++it;
+	}
 
 }
 

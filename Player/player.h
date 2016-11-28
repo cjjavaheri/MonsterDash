@@ -63,6 +63,8 @@ class Player
 
 	Site* calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player);
 
+	void removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc);
+
 
 	
 
