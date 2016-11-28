@@ -240,42 +240,58 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 	unsigned int i;
 	unsigned int j;
 	int shortestDist;
-	bool **marked = nullptr;
+	int longestDist;
 	map<Site*, vector<Site*>>::iterator it;
 	vector<Site*>::iterator vectIt;
 	Site* nearestCorr;
 	static vector<Site*> cycle;
+	Site* prevMove;
 
-	if (cycle.empty())
-	{
+	//if (cycle.empty())
+	//{
 		it = adjDisc.begin();
-		while (it != adjDisc.end() && (it->second).size() < 2)
-			it++;
-	
-		nearestCorr = it->first;
-		getMarkedArray(marked);
-
-		
-		cycle = findCycleDisc(adjDisc, marked);
-
-		vectIt = cycle.begin();
-		while (vectIt != cycle.end())
+		shortestDist = distPlayer[it->first->i()][it->first->j()];
+		if (it->second.size() > 1)
+			nearestCorr = it->first;
+		while (it != adjDisc.end())
 		{
-			cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
-			vectIt++;
+			cout << it->first->i() << " " << it->first->j() << endl;
+			if (distPlayer[it->first->i()][it->first->j()] < shortestDist && it->second.size() > 1)
+			{
+				shortestDist = distPlayer[it->first->i()][it->first->j()];
+				nearestCorr = it->first;
+			
+			}
+			it++;
 		}
-		return it->first;
 
+	//}
+
+	it = adjDisc.begin();
+	while (it != adjDisc.end() && (it->first->i() != nearestCorr->i() || it->first->j() != nearestCorr->j()))
+		it++;
+
+
+	vectIt = it->second.begin();
+	longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
+	if (it->second.size() > 1)
+		nearestCorr = *vectIt;
+	while (vectIt != it->second.end())
+	{
+		if (distMonster[(*vectIt)->i()][(*vectIt)->j()] > longestDist && it->second.size() > 1 )
+		{
+			longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
+			nearestCorr = *vectIt;
+		}
+
+		vectIt++;
 	}
-
-	nearestCorr = new Site(0, 0);
-	return nearestCorr;
 
 	i = nearestCorr->i();
 	j = nearestCorr->j();
 
-	if (i == player->i() && j == player->j())
-		return nearestCorr;
+	//if (i == player->i() && j == player->j())
+		//return nearestCorr;
 	
 
 
@@ -289,6 +305,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
                 i = nearestCorr->i();
                 j = nearestCorr->j();
             }
+	    cycle.push_back(nearestCorr);
             return nearestCorr;
 
         }
@@ -303,93 +320,9 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
             allocatedMemory.push_back(nextMove);
             */
 
+	    cycle.push_back(nearestCorr);
             return nearestCorr;
         }
-
-}
-
-void Player::getMarkedArray(bool **&marked)
-{
-
-	int i;
-	int j;
-    // Create a 2D array of bools to mark visited vertices.
-    marked = new (nothrow) bool *[N];
-    for (i = 0; i < N; i++)
-        marked[i] = new (nothrow) bool [N];
-
-    // Initialize them all as false.
-    for (i = 0; i < N; i++)
-        for (j = 0; j < N; j++)
-            marked[i][j] = false;
-}
-
-vector<Site*> Player::findCycleDisc(map<Site*, vector<Site*>> &adjDisc, bool **&marked)
-{
-	unsigned int i;
-	unsigned int j;
-	bool isCycle = false;
-	map<Site*, vector<Site*>>::iterator it;
-	map<Site*, vector<Site*>>::iterator mapIt;
-	vector<Site*>::iterator vectIt;
-	stack<Site*> mystack;
-	Site* site;
-	map<Site*, vector<Site*>> cycle;
-	vector<Site*> myvector;
-
-	// Use Dfs to get cycle.
-	it = adjDisc.begin();
-	mystack.push(it->first);
-	while (!mystack.empty())
-	{
-		// Pop each element off stack, mark it as visited.
-		site = mystack.top();
-		mystack.pop();
-
-		i = site->i();
-		j = site->j();
-
-		
-		if (!marked[i][j])
-			marked[i][j] = true;
-
-		it = adjDisc.begin();
-		// Find the element that was popped off stack in adjacency map.
-		while (it != adjDisc.end() && (it->first->i() != i || it->first->j() != j))
-			it++;
-
-
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-				// If the vertex, hasn't been visited push it.
-			if (!marked[(*vectIt)->i()][(*vectIt)->j()])
-				mystack.push(*vectIt);
-			else
-			{
-				// Otherwise it's a part of the cycle, put it into the cycle map.
-				mapIt = adjDisc.begin();
-				i = (*vectIt)->i();
-				j = (*vectIt)->j();
-				while (mapIt != adjDisc.end() && (mapIt->first->i() != i || mapIt->first->j() != j))
-					mapIt++;
-		
-				if (mapIt->second.size() > 1)
-				cycle.insert({mapIt->first, mapIt->second});
-			}
-			vectIt++;
-		}
-	}
-
-	// Store the cycle in a vector and return the cycle.
-	mapIt = cycle.begin();
-	while (mapIt != cycle.end())
-	{
-		myvector.push_back(mapIt->first);
-		mapIt++;
-	}
-
-	return myvector;
 
 }
 

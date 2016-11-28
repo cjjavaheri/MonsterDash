@@ -63,9 +63,6 @@ class Player
 
 	Site* calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player);
 
-	void getMarkedArray(bool **&marked);
-
-vector<Site*> findCycleDisc(map<Site*, vector<Site*>> &adjDisc, bool **&marked);
 
 	
 
