@@ -205,15 +205,15 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     {
         removeDeadEnds(adj);
 
-	disc = countDisconnectedComponents(adj);
+        disc = countDisconnectedComponents(adj);
         cout << "Dist: " << disc << endl;
 
-	if (disc != 0)
-	{
-		adjDisc = getAdjListDisc(adj, allocatedMemory);
-		return calculateNextRoom(adjDisc, distMonster, distPlayer, prevPlayer, player);
-		
-	}
+        if (disc != 0)
+        {
+            adjDisc = getAdjListDisc(adj, allocatedMemory);
+            return calculateNextRoom(adjDisc, distMonster, distPlayer, prevPlayer, player);
+
+        }
     }
 
 
@@ -235,157 +235,272 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
 }
 
-		Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player)
+Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player)
 {
-	unsigned int i;
-	unsigned int j;
-	int shortestDist;
-	int longestDist;
-	map<Site*, vector<Site*>>::iterator it;
-	map<Site*, vector<Site*>>::iterator eraseMap;
-	map<Site*, vector<Site*>>::iterator mapIt;
-	vector<Site*>::iterator vectIt;
-	vector<Site*>::iterator eraseVect;
-	Site* nearestCorr;
-	static vector<Site*> cycle;
+    unsigned int i;
+    unsigned int j;
+    int shortestDist;
+    int longestDist;
+    map<Site*, vector<Site*>>::iterator it;
+    map<Site*, vector<Site*>>::iterator eraseMap;
+    map<Site*, vector<Site*>>::iterator mapIt;
+    vector<Site*>::iterator vectIt;
+    vector<Site*>::iterator eraseVect;
+    Site* nearestCorr;
+    static vector<Site*> cycle;
 
-	removeDeadEndVertices(adjDisc);
+    if (playfield->isCorridor(player->i(), player->j()))
+    {
+        nearestCorr = new Site(player->i(), player->j());
+        cycle.push_back(nearestCorr);
+    }
 
-	//if (cycle.empty())
-	//{
-		it = adjDisc.begin();
-		shortestDist = distPlayer[it->first->i()][it->first->j()];
-		nearestCorr = it->first;
-		while (it != adjDisc.end())
-		{
-			cout << it->first->i() << " " << it->first->j() << endl;
-			if (distPlayer[it->first->i()][it->first->j()] <= shortestDist)
-			{
-				shortestDist = distPlayer[it->first->i()][it->first->j()];
-				nearestCorr = it->first;
-			
-			}
-			it++;
-		}
+    removeDeadEndVertices(adjDisc);
 
-	//}
+    if (distMonster[player->i()][player->j()] < 4)
+    {
+        run(player, nearestCorr, distPlayer, distMonster, cycle);
+    }
 
-	it = adjDisc.begin();
-	while (it != adjDisc.end() && (it->first->i() != nearestCorr->i() || it->first->j() != nearestCorr->j()))
-		it++;
+    else
+    {
 
-
-	vectIt = it->second.begin();
-	longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
-	nearestCorr = *vectIt;
-	while (vectIt != it->second.end())
-	{
-		if (distMonster[(*vectIt)->i()][(*vectIt)->j()] >= longestDist )
-		{
-			longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
-			nearestCorr = *vectIt;
-		}
-
-		vectIt++;
-	}
-
-	i = nearestCorr->i();
-	j = nearestCorr->j();
-
-	if (i == player->i() && j == player->j())
-		return nearestCorr;
-	
-
-
-	 // Starting distance is not 1
-        if (distPlayer[i][j] != 1)
+        //if (cycle.empty())
+        //{
+        it = adjDisc.begin();
+        shortestDist = distPlayer[it->first->i()][it->first->j()];
+        nearestCorr = it->first;
+        while (it != adjDisc.end())
         {
-
-            while (distPlayer[i][j] != 1)
+            cout << it->first->i() << " " << it->first->j() << endl;
+            if (distPlayer[it->first->i()][it->first->j()] <= shortestDist)
             {
-                nearestCorr = prevPlayer[i][j];
-                i = nearestCorr->i();
-                j = nearestCorr->j();
+                shortestDist = distPlayer[it->first->i()][it->first->j()];
+                nearestCorr = it->first;
+
             }
-	    cycle.push_back(nearestCorr);
-            return nearestCorr;
-
+            it++;
         }
 
-        // Starting distance is 1 ; therefore, the monster only has to take
-        // one more move to reach the player.
-        else
+        //}
+
+        it = adjDisc.begin();
+        while (it != adjDisc.end() && (it->first->i() != nearestCorr->i() || it->first->j() != nearestCorr->j()))
+            it++;
+
+
+        vectIt = it->second.begin();
+        longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
+        nearestCorr = *vectIt;
+        while (vectIt != it->second.end())
         {
+            if (distMonster[(*vectIt)->i()][(*vectIt)->j()] >= longestDist )
+            {
+                longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
+                nearestCorr = *vectIt;
+            }
 
-            /*
-            nextMove = new Site(player->i(), player->j());
-            allocatedMemory.push_back(nextMove);
-            */
-
-	    cycle.push_back(nearestCorr);
-            return nearestCorr;
+            vectIt++;
         }
+
+    }
+
+    i = nearestCorr->i();
+    j = nearestCorr->j();
+
+    if (i == player->i() && j == player->j())
+        return nearestCorr;
+
+
+
+    // Starting distance is not 1
+    if (distPlayer[i][j] != 1)
+    {
+
+        while (distPlayer[i][j] != 1)
+        {
+            nearestCorr = prevPlayer[i][j];
+            i = nearestCorr->i();
+            j = nearestCorr->j();
+        }
+        cycle.push_back(nearestCorr);
+        return nearestCorr;
+
+    }
+
+    // Starting distance is 1 ; therefore, the monster only has to take
+    // one more move to reach the player.
+    else
+    {
+
+        /*
+        nextMove = new Site(player->i(), player->j());
+        allocatedMemory.push_back(nextMove);
+        */
+
+        cycle.push_back(nearestCorr);
+        return nearestCorr;
+    }
+
+}
+
+void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int **&distMonster, vector<Site*> &cycle)
+{
+    int i = player->i();
+    int j = player->j();
+	unsigned int a;
+	unsigned int b;
+    int shortestDist;
+    int longestDist;
+    vector<Site*> vectDisc;
+    vector<Site*>::iterator vectIt;
+    vector<Site*>::iterator prevIt;
+    vector<Site*>::iterator erase;
+
+
+    Site* site = new Site(player->i(), player->j());
+
+
+    if (playfield->isRoom(player))
+    {
+        while (playfield->isRoom(i, j))
+            j++;
+        j--;
+
+        while (playfield->isRoom(i, j))
+            i++;
+
+        i--;
+
+        // Now search the room.
+        search(vectDisc, site, i, j);
+        checkDuplicates(vectDisc, site);
+
+        prevIt = cycle.end();
+        prevIt--;
+
+        a = (*prevIt)->i();
+        b = (*prevIt)->j();
+
+	cout << "a: " << a << endl;
+	cout << "b: " << b << endl;
+
+        vectIt = vectDisc.begin();
+        while (vectIt != vectDisc.end())
+        {
+            if ((*vectIt)->i() == a && (*vectIt)->j() == b)
+            {
+		erase = vectIt;
+		++vectIt;
+		vectDisc.erase(erase);
+
+            }
+
+            else
+                vectIt++;
+        }
+
+	 vectIt = vectDisc.begin();
+        while (vectIt != vectDisc.end())
+        {
+            cout << (*vectIt)->i() << " " <<  (*vectIt)->j() << endl;
+	    vectIt++;
+        }
+
+        vectIt = vectDisc.begin();
+        shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+        nearestCorr = *vectIt;
+        while (vectIt != vectDisc.end())
+        {
+            if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < shortestDist)
+            {
+                shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+                nearestCorr = *vectIt;
+            }
+
+            vectIt++;
+        }
+
+    }
+
+    else
+    {
+        longestDist = distMonster[i][j];
+        if (distMonster[i + 1][j] > longestDist && playfield->isRoom(i + 1, j))
+            nearestCorr = new Site(i + 1, j);
+
+        if (distMonster[i - 1][j] > longestDist && playfield->isRoom(i - 1, j))
+            nearestCorr = new Site(i - 1, j);
+
+        if (distMonster[i][j + 1] > longestDist && playfield->isRoom(i, j + 1))
+            nearestCorr = new Site(i, j + 1);
+
+        if (distMonster[i][j - 1] > longestDist && playfield->isRoom(i, j - 1))
+            nearestCorr = new Site(i, j - 1);
+
+
+    }
 
 }
 
 void Player::removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc)
 {
-	map<Site*, vector<Site*>>::iterator it;
-	map<Site*, vector<Site*>>::iterator eraseMap;
-	map<Site*, vector<Site*>>::iterator mapIt;
-	vector<Site*>::iterator vectIt;
-	vector<Site*>::iterator eraseVect;
-	Site* test;
-	unsigned int i;
-	unsigned int j;
-	bool exist;
+    map<Site*, vector<Site*>>::iterator it;
+    map<Site*, vector<Site*>>::iterator eraseMap;
+    map<Site*, vector<Site*>>::iterator mapIt;
+    vector<Site*>::iterator vectIt;
+    vector<Site*>::iterator eraseVect;
+    Site* test;
+    unsigned int i;
+    unsigned int j;
+    bool exist;
 
 
-		it = adjDisc.begin();
-	while (it != adjDisc.end())
-	{
-		if (it->second.size() <= 1)
-		{
-			eraseMap = it;
-			++it;
-			adjDisc.erase(eraseMap);
-		}
-		else
-			it++;
-		
-	}
+    it = adjDisc.begin();
+    while (it != adjDisc.end())
+    {
+        if (it->second.size() <= 1)
+        {
+            eraseMap = it;
+            ++it;
+            adjDisc.erase(eraseMap);
+        }
+        else
+            it++;
 
-	it = adjDisc.begin();
-	while (it != adjDisc.end())
-	{
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			exist = false;
-			test = *vectIt;
-			i = test->i();
-			j = test->j();
-			mapIt = adjDisc.begin();
-			while (mapIt != adjDisc.end())
-			{
-				if (i == mapIt->first->i() && j == mapIt->first->j())
-					exist = true;
-				mapIt++;
-			}
+    }
 
-			if (!exist)
-			{
-				eraseVect = vectIt;
-				++vectIt;
-				(it->second).erase(eraseVect);
-			}
+    it = adjDisc.begin();
+    while (it != adjDisc.end())
+    {
+        vectIt = it->second.begin();
+        while (vectIt != it->second.end())
+        {
+            exist = false;
+            test = *vectIt;
+            i = test->i();
+            j = test->j();
+            mapIt = adjDisc.begin();
+            while (mapIt != adjDisc.end())
+            {
+                if (i == mapIt->first->i() && j == mapIt->first->j())
+                    exist = true;
+                mapIt++;
+            }
 
-			else
-				vectIt++;
-		}
+            if (!exist)
+            {
+                eraseVect = vectIt;
+                ++vectIt;
+                (it->second).erase(eraseVect);
+            }
 
-		++it;
-	}
+            else
+                vectIt++;
+        }
+
+        ++it;
+    }
 
 }
 
@@ -424,93 +539,93 @@ map<Site*, vector<Site*>> Player::getAdjListDisc(map<Site*, vector<Site*>> &adj,
         if (playfield->isRoom(i, j - 1))
         {
 
-		// Set i and j to bottom right of room.
-		j--;
-		while (playfield->isRoom(i, j))
-			i++;
+            // Set i and j to bottom right of room.
+            j--;
+            while (playfield->isRoom(i, j))
+                i++;
 
-		i--;
+            i--;
 
-		// Now begin search.
+            // Now begin search.
             search(vectDisc, site, i, j);
-		checkDuplicates(vectDisc, site);
+            checkDuplicates(vectDisc, site);
 
-		i = site->i();
-		j = site->j();
+            i = site->i();
+            j = site->j();
         }
 
-	if (playfield->isRoom(i, j + 1))
+        if (playfield->isRoom(i, j + 1))
         {
 
-		// Set i and j to bottom right.
-		j++;
-		while (playfield->isRoom(i, j))
-			i++;
+            // Set i and j to bottom right.
+            j++;
+            while (playfield->isRoom(i, j))
+                i++;
 
-		i--;
+            i--;
 
-		while (playfield->isRoom(i, j))
-			j++;
+            while (playfield->isRoom(i, j))
+                j++;
 
-		j--;
+            j--;
 
-		// Now search the room.
+            // Now search the room.
             search(vectDisc, site, i, j);
-		checkDuplicates(vectDisc, site);
+            checkDuplicates(vectDisc, site);
 
-		i = site->i();
-		j = site->j();
+            i = site->i();
+            j = site->j();
         }
 
-	if (playfield->isRoom(i + 1, j))
+        if (playfield->isRoom(i + 1, j))
         {
 
-		// Set i and j to bottom right.
-		i++;
-	
-		while (playfield->isRoom(i, j))
-			j++;
-		j--;
+            // Set i and j to bottom right.
+            i++;
 
-		while (playfield->isRoom(i, j))
-			i++;
+            while (playfield->isRoom(i, j))
+                j++;
+            j--;
 
-		i--;
+            while (playfield->isRoom(i, j))
+                i++;
 
-		// Now search the room.
+            i--;
+
+            // Now search the room.
             search(vectDisc, site, i, j);
-		checkDuplicates(vectDisc, site);
+            checkDuplicates(vectDisc, site);
 
-		i = site->i();
-		j = site->j();
+            i = site->i();
+            j = site->j();
         }
 
-	if (playfield->isRoom(i - 1, j))
+        if (playfield->isRoom(i - 1, j))
         {
 
-		// Set i and j to bottom right of room.
-		i--;
+            // Set i and j to bottom right of room.
+            i--;
 
-		while (playfield->isRoom(i, j))
-			j++;
+            while (playfield->isRoom(i, j))
+                j++;
 
-		j--;
+            j--;
 
-		// Search room for adjacent corridor sites.
+            // Search room for adjacent corridor sites.
             search(vectDisc, site, i, j);
-		checkDuplicates(vectDisc, site);
+            checkDuplicates(vectDisc, site);
 
-		i = site->i();
-		j = site->j();
+            i = site->i();
+            j = site->j();
         }
 
         it->second = vectDisc;
-	memIt = vectDisc.begin();
-	while (memIt != vectDisc.end())
-	{
-		allocatedMemory.push_back((*memIt));
-		memIt++;
-	}
+        memIt = vectDisc.begin();
+        while (memIt != vectDisc.end())
+        {
+            allocatedMemory.push_back((*memIt));
+            memIt++;
+        }
         vectDisc.clear();
         it++;
     }
@@ -521,20 +636,20 @@ map<Site*, vector<Site*>> Player::getAdjListDisc(map<Site*, vector<Site*>> &adj,
 
 void Player::checkDuplicates(vector<Site*> &vectDisc, Site* site)
 {
-	// Check to make sure that the current corridor site the player
-	// is standing on is NOT apart of the adjacency list.
-	vector<Site*>::iterator it;
-	it = vectDisc.begin();
-	while (it != vectDisc.end())
-	{
-		if ((*it)->i() == site->i() && (*it)->j() == site->j())
-		{
-			it = vectDisc.erase(it);
-		}
+    // Check to make sure that the current corridor site the player
+    // is standing on is NOT apart of the adjacency list.
+    vector<Site*>::iterator it;
+    it = vectDisc.begin();
+    while (it != vectDisc.end())
+    {
+        if ((*it)->i() == site->i() && (*it)->j() == site->j())
+        {
+            it = vectDisc.erase(it);
+        }
 
-		else
-			it++;
-	}
+        else
+            it++;
+    }
 
 
 }
@@ -546,10 +661,10 @@ void Player::search(vector<Site*> &vectDisc, Site* site, int &i, int &j)
     Site* newSite;
 
 
-	// Search a room starting from the bottom right looking
-	// for adjacent corridor sites.
+    // Search a room starting from the bottom right looking
+    // for adjacent corridor sites.
 
-	// Search from bottom right to bottom left.
+    // Search from bottom right to bottom left.
     while (playfield->isRoom(i, j))
     {
         if (playfield->isCorridor(i + 1, j))
@@ -579,7 +694,7 @@ void Player::search(vector<Site*> &vectDisc, Site* site, int &i, int &j)
         j--;
     }
 
-	// Search from bottom left to to top left.
+    // Search from bottom left to to top left.
 
     j++;
     while (playfield->isRoom(i, j))
@@ -613,7 +728,7 @@ void Player::search(vector<Site*> &vectDisc, Site* site, int &i, int &j)
 
     i++;
 
-	// Search from top left to top right.
+    // Search from top left to top right.
     while (playfield->isRoom(i, j))
     {
         if (playfield->isCorridor(i - 1, j))
@@ -643,7 +758,7 @@ void Player::search(vector<Site*> &vectDisc, Site* site, int &i, int &j)
         j++;
     }
 
-	// Search from top right to bottom right.
+    // Search from top right to bottom right.
 
     j--;
     while (playfield->isRoom(i, j))
@@ -675,7 +790,7 @@ void Player::search(vector<Site*> &vectDisc, Site* site, int &i, int &j)
         i++;
     }
 
-	i--;
+    i--;
 
 }
 

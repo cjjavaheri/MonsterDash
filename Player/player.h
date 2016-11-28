@@ -65,6 +65,8 @@ class Player
 
 	void removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc);
 
+	void run(const Site* player, Site* &nearestCorr, int **&distPlayer, int **&distMonster, vector<Site*> &cycle);
+
 
 	
 
