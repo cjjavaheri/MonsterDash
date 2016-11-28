@@ -221,15 +221,13 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
     if (playfield->isCorridor(player))
     {
-        nextMove = findCorridorCycle(adj, distMonster, allocatedMemory, cycle, start, player);
-        return nextMove;
+        return findCorridorCycle(adj, distMonster, allocatedMemory, cycle, start, player);
     }
 
     if (playfield->isRoom(player))
     {
 
-        nextMove = returnToStart(adj, distPlayer, prevPlayer, allocatedMemory, start, player);
-        return nextMove;
+        return returnToStart(adj, distPlayer, prevPlayer, allocatedMemory, start, player);
     }
 
 
@@ -249,7 +247,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
     Site* nearestCorr;
     static vector<Site*> cycle;
 
-	// Save the previous corridor site that the player walks through.
+    // Save the previous corridor site that the player walks through.
 
     if (playfield->isCorridor(player->i(), player->j()))
     {
@@ -263,13 +261,13 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
         cycle.push_back(nearestCorr);
     }
 
-	// Remove any vertices which have 1 or less than 1 vertices in their
-	// adjacency list.
+    // Remove any vertices which have 1 or less than 1 vertices in their
+    // adjacency list.
     removeDeadEndVertices(adjDisc);
 
-	// If the monster is right behind the player, simply find a corridor site
-	// in the current room with the highest number of adjacent corridor sites
-	// to that particular corridor site.
+    // If the monster is right behind the player, simply find a corridor site
+    // in the current room with the highest number of adjacent corridor sites
+    // to that particular corridor site.
     if (distMonster[player->i()][player->j()] < 5 && N > 20 && !cycle.empty())
     {
         run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
@@ -283,7 +281,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
     else
     {
 
-	// If the monster is not right behind the player, then find the nearest corridor site.
+        // If the monster is not right behind the player, then find the nearest corridor site.
         it = adjDisc.begin();
         shortestDist = distPlayer[it->first->i()][it->first->j()];
         nearestCorr = it->first;
@@ -298,14 +296,14 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
             it++;
         }
 
-	// Find that corridor site's adjacency list.
+        // Find that corridor site's adjacency list.
         it = adjDisc.begin();
         while (it != adjDisc.end() && (it->first->i() != nearestCorr->i() || it->first->j() != nearestCorr->j()))
             it++;
 
 
-	// Look at all of the corridor vertices in the room. Take the path to the corridor site
-	// which is the farthes away from the monster's location.
+        // Look at all of the corridor vertices in the room. Take the path to the corridor site
+        // which is the farthes away from the monster's location.
         vectIt = it->second.begin();
         longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
         nearestCorr = *vectIt;
@@ -322,7 +320,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 
     }
 
-	// Calculate the path to that corridor site.
+    // Calculate the path to that corridor site.
     i = nearestCorr->i();
     j = nearestCorr->j();
 
@@ -359,8 +357,8 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
 {
     int i = player->i();
     int j = player->j();
-	unsigned int a;
-	unsigned int b;
+    unsigned int a;
+    unsigned int b;
     int longestDist;
     vector<Site*> vectDisc;
     vector<Site*>::iterator vectIt;
@@ -377,8 +375,8 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
     if (playfield->isRoom(player))
     {
 
-	// Set i and j to bottom right of room in order to search
-	// for adjacent corridor sites to the room.
+        // Set i and j to bottom right of room in order to search
+        // for adjacent corridor sites to the room.
         while (playfield->isRoom(i, j))
             j++;
         j--;
@@ -391,14 +389,14 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
         // Now search the room.
         search(vectDisc, site, i, j);
         checkDuplicates(vectDisc, site);
-	
+
 
 
         prevIt = cycle.end();
         prevIt--;
 
 
-	// Delete the previous corridor site from the monster's list of decisions.
+        // Delete the previous corridor site from the monster's list of decisions.
         a = (*prevIt)->i();
         b = (*prevIt)->j();
 
@@ -408,9 +406,9 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
         {
             if ((*vectIt)->i() == a && (*vectIt)->j() == b)
             {
-		erase = vectIt;
-		vectDisc.erase(erase);
-		vectIt = vectDisc.end();
+                erase = vectIt;
+                vectDisc.erase(erase);
+                vectIt = vectDisc.end();
 
             }
 
@@ -420,62 +418,62 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
 
 
 
-	// Check each corridor site adjacent to the current room the player is in.
-	// Take the path to the one with the highest number of adjacent vertices.
-	 vectIt = vectDisc.begin();
+        // Check each corridor site adjacent to the current room the player is in.
+        // Take the path to the one with the highest number of adjacent vertices.
+        vectIt = vectDisc.begin();
         while (vectIt != vectDisc.end())
         {
-		a = (*vectIt)->i();
-		b = (*vectIt)->j();
+            a = (*vectIt)->i();
+            b = (*vectIt)->j();
 
-        	it = adjDisc.begin();
-		while (it != adjDisc.end())
-		{
-			if (it->first->i() == a && it->first->j() == b)
-			{
-				vertices.insert({it->second.size(), *vectIt});
+            it = adjDisc.begin();
+            while (it != adjDisc.end())
+            {
+                if (it->first->i() == a && it->first->j() == b)
+                {
+                    vertices.insert({it->second.size(), *vectIt});
 
-			}
+                }
 
-			it++;
-		}
+                it++;
+            }
 
-		vectIt++;
+            vectIt++;
         }
 
-	myVertices = vertices.begin();
+        myVertices = vertices.begin();
 
-	while (myVertices != vertices.end())
-		myVertices++;
+        while (myVertices != vertices.end())
+            myVertices++;
 
-	myVertices--;
-	nearestCorr = myVertices->second;
+        myVertices--;
+        nearestCorr = myVertices->second;
 
     }
 
-	// If the player is on a corridor site, then enter the next room by looking at which
-	// room site has a higher distance away from the monster.
+    // If the player is on a corridor site, then enter the next room by looking at which
+    // room site has a higher distance away from the monster.
     else
     {
         longestDist = distMonster[i][j];
-	if (i + 1 < N)
-        	if (distMonster[i + 1][j] > longestDist && playfield->isRoom(i + 1, j))
-            		nearestCorr = new Site(i + 1, j);
+        if (i + 1 < N)
+            if (distMonster[i + 1][j] > longestDist && playfield->isRoom(i + 1, j))
+                nearestCorr = new Site(i + 1, j);
 
 
-	if (i - 1 > -1)
-        	if (distMonster[i - 1][j] > longestDist && playfield->isRoom(i - 1, j))
-            		nearestCorr = new Site(i - 1, j);
+        if (i - 1 > -1)
+            if (distMonster[i - 1][j] > longestDist && playfield->isRoom(i - 1, j))
+                nearestCorr = new Site(i - 1, j);
 
-	if (j + 1 < N)
-        	if (distMonster[i][j + 1] > longestDist && playfield->isRoom(i, j + 1))
-            		nearestCorr = new Site(i, j + 1);
+        if (j + 1 < N)
+            if (distMonster[i][j + 1] > longestDist && playfield->isRoom(i, j + 1))
+                nearestCorr = new Site(i, j + 1);
 
-	if (j - 1 > -1)
-        	if (distMonster[i][j - 1] > longestDist && playfield->isRoom(i, j - 1))
-            		nearestCorr = new Site(i, j - 1);
+        if (j - 1 > -1)
+            if (distMonster[i][j - 1] > longestDist && playfield->isRoom(i, j - 1))
+                nearestCorr = new Site(i, j - 1);
 
-	
+
     }
 
 }
@@ -492,8 +490,8 @@ void Player::removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc)
     unsigned int j;
     bool exist;
 
-	// Remove any vertices which have 1 or less than 1 adjacent vertices
-	// in their adjacency list.
+    // Remove any vertices which have 1 or less than 1 adjacent vertices
+    // in their adjacency list.
     it = adjDisc.begin();
     while (it != adjDisc.end())
     {
@@ -508,8 +506,8 @@ void Player::removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc)
 
     }
 
-	// Since these vertices no longer exist, i.e. we can no longer access their adjacency
-	// list, we must remove them from other vertices' adjacency lists.
+    // Since these vertices no longer exist, i.e. we can no longer access their adjacency
+    // list, we must remove them from other vertices' adjacency lists.
     it = adjDisc.begin();
     while (it != adjDisc.end())
     {
