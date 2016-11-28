@@ -264,12 +264,12 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 	// If the monster is right behind the player, simply find a corridor site
 	// in the current room with the highest number of adjacent corridor sites
 	// to that particular corridor site.
-    if (distMonster[player->i()][player->j()] < 10 && N > 20)
+    if (distMonster[player->i()][player->j()] < 10 && N > 20 && !cycle.empty())
     {
         run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
     }
 
-    else if (distMonster[player->i()][player->j()] < 6 && N <= 20)
+    else if (distMonster[player->i()][player->j()] < 6 && N <= 20 && !cycle.empty())
     {
         run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
     }
