@@ -7,6 +7,7 @@
 #include "playfield.h"
 #include <queue>
 #include <vector>
+#include <stack>
 
 class Player 
 {
@@ -58,6 +59,13 @@ class Player
 	void search(vector<Site*> &vectDisc, Site* site, int &i, int &j);
 
 	void checkDuplicates(vector<Site*> &vectDisc, Site* site);
+
+
+	Site* calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player);
+
+	void getMarkedArray(bool **&marked);
+
+vector<Site*> findCycleDisc(map<Site*, vector<Site*>> &adjDisc, bool **&marked);
 
 	
 
