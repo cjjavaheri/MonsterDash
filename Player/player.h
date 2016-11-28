@@ -48,5 +48,18 @@ class Player
 
 	Site* keepDistance(int **&distMonster, const Site* player, vector<Site*> &allocatedMemory);
 
+	int countDisconnectedComponents(map<Site*, vector<Site*>> &adj);
+
+
+	map<Site*, vector<Site*>> getAdjListDisc(map<Site*, vector<Site*>> &adj, vector<Site*> &allocatedMemory);
+
+	 void removeDeadEnds(map<Site*, vector<Site*>> &adj);
+
+	void search(vector<Site*> &vectDisc, Site* site, int &i, int &j);
+
+	void checkDuplicates(vector<Site*> &vectDisc, Site* site);
+
+	
+
 };
 #endif
