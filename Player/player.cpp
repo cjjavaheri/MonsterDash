@@ -257,9 +257,15 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 
     removeDeadEndVertices(adjDisc);
 
-    if (distMonster[player->i()][player->j()] < 10)
+
+    if (distMonster[player->i()][player->j()] < 10 && N > 20)
     {
-        run(player, nearestCorr, distPlayer, distMonster, cycle);
+        run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
+    }
+
+    else if (distMonster[player->i()][player->j()] < 6 && N <= 20)
+    {
+        run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
     }
 
     else
@@ -342,7 +348,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 
 }
 
-void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int **&distMonster, vector<Site*> &cycle)
+void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int **&distMonster, vector<Site*> &cycle, map<Site*, vector<Site*>> &adjDisc)
 {
     int i = player->i();
     int j = player->j();
@@ -354,6 +360,9 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
     vector<Site*>::iterator vectIt;
     vector<Site*>::iterator prevIt;
     vector<Site*>::iterator erase;
+    map<Site*, vector<Site*>>::iterator it;
+    map<int, Site*> vertices;
+    map<int, Site*>::iterator myVertices;
 
 
     Site* site = new Site(player->i(), player->j());
@@ -373,15 +382,23 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
         // Now search the room.
         search(vectDisc, site, i, j);
         checkDuplicates(vectDisc, site);
+	
+
 
         prevIt = cycle.end();
         prevIt--;
 
+	   vectIt = vectDisc.begin();
+        while (vectIt != vectDisc.end())
+        {
+		vectIt++;
+        }
+
+
+	// Delete the previous corridor site from the monster's list of decisions.
         a = (*prevIt)->i();
         b = (*prevIt)->j();
 
-	cout << "a: " << a << endl;
-	cout << "b: " << b << endl;
 
         vectIt = vectDisc.begin();
         while (vectIt != vectDisc.end())
@@ -398,14 +415,46 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
                 vectIt++;
         }
 
+
+
+	// Delete any corridors that don't have a path to an adjacent room.
 	 vectIt = vectDisc.begin();
         while (vectIt != vectDisc.end())
         {
-            cout << (*vectIt)->i() << " " <<  (*vectIt)->j() << endl;
-	    vectIt++;
+		a = (*vectIt)->i();
+		b = (*vectIt)->j();
+
+		cout << "a: " << a << endl;
+		cout << "b: " << b << endl;
+
+        	it = adjDisc.begin();
+		while (it != adjDisc.end())
+		{
+			cout << it->first->i() << " " << it->first->j() << endl;
+			if (it->first->i() == a && it->first->j() == b)
+			{
+				vertices.insert({it->second.size(), *vectIt});
+
+			}
+
+			it++;
+		}
+
+		vectIt++;
         }
 
-        vectIt = vectDisc.begin();
+	myVertices = vertices.begin();
+	if (myVertices == vertices.end())
+		cout << "End" << endl;
+	while (myVertices != vertices.end())
+		myVertices++;
+
+	myVertices--;
+
+	nearestCorr = myVertices->second;
+
+	
+       /* vectIt = vectDisc.begin();
         shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
         nearestCorr = *vectIt;
         while (vectIt != vectDisc.end())
@@ -419,24 +468,31 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
             vectIt++;
         }
 
+	*/
+
     }
 
     else
     {
         longestDist = distMonster[i][j];
-        if (distMonster[i + 1][j] > longestDist && playfield->isRoom(i + 1, j))
-            nearestCorr = new Site(i + 1, j);
-
-        if (distMonster[i - 1][j] > longestDist && playfield->isRoom(i - 1, j))
-            nearestCorr = new Site(i - 1, j);
-
-        if (distMonster[i][j + 1] > longestDist && playfield->isRoom(i, j + 1))
-            nearestCorr = new Site(i, j + 1);
-
-        if (distMonster[i][j - 1] > longestDist && playfield->isRoom(i, j - 1))
-            nearestCorr = new Site(i, j - 1);
+	if (i + 1 < N)
+        	if (distMonster[i + 1][j] > longestDist && playfield->isRoom(i + 1, j))
+            		nearestCorr = new Site(i + 1, j);
 
 
+	if (i - 1 > -1)
+        	if (distMonster[i - 1][j] > longestDist && playfield->isRoom(i - 1, j))
+            		nearestCorr = new Site(i - 1, j);
+
+	if (j + 1 < N)
+        	if (distMonster[i][j + 1] > longestDist && playfield->isRoom(i, j + 1))
+            		nearestCorr = new Site(i, j + 1);
+
+	if (j - 1 > -1)
+        	if (distMonster[i][j - 1] > longestDist && playfield->isRoom(i, j - 1))
+            		nearestCorr = new Site(i, j - 1);
+
+	
     }
 
 }
