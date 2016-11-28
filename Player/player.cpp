@@ -257,7 +257,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 
     removeDeadEndVertices(adjDisc);
 
-    if (distMonster[player->i()][player->j()] < 4)
+    if (distMonster[player->i()][player->j()] < 10)
     {
         run(player, nearestCorr, distPlayer, distMonster, cycle);
     }
@@ -323,7 +323,6 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
             i = nearestCorr->i();
             j = nearestCorr->j();
         }
-        cycle.push_back(nearestCorr);
         return nearestCorr;
 
     }
@@ -338,7 +337,6 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
         allocatedMemory.push_back(nextMove);
         */
 
-        cycle.push_back(nearestCorr);
         return nearestCorr;
     }
 
@@ -391,8 +389,8 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
             if ((*vectIt)->i() == a && (*vectIt)->j() == b)
             {
 		erase = vectIt;
-		++vectIt;
 		vectDisc.erase(erase);
+		vectIt = vectDisc.end();
 
             }
 
