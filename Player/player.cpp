@@ -256,7 +256,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 		while (it != adjDisc.end())
 		{
 			cout << it->first->i() << " " << it->first->j() << endl;
-			if (distPlayer[it->first->i()][it->first->j()] < shortestDist && it->second.size() > 1)
+			if (distPlayer[it->first->i()][it->first->j()] <= shortestDist && it->second.size() > 1)
 			{
 				shortestDist = distPlayer[it->first->i()][it->first->j()];
 				nearestCorr = it->first;
@@ -278,7 +278,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 		nearestCorr = *vectIt;
 	while (vectIt != it->second.end())
 	{
-		if (distMonster[(*vectIt)->i()][(*vectIt)->j()] > longestDist && it->second.size() > 1 )
+		if (distMonster[(*vectIt)->i()][(*vectIt)->j()] >= longestDist && it->second.size() > 1 )
 		{
 			longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
 			nearestCorr = *vectIt;
@@ -290,8 +290,8 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 	i = nearestCorr->i();
 	j = nearestCorr->j();
 
-	//if (i == player->i() && j == player->j())
-		//return nearestCorr;
+	if (i == player->i() && j == player->j())
+		return nearestCorr;
 	
 
 
