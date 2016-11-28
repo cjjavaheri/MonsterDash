@@ -242,21 +242,71 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 	int shortestDist;
 	int longestDist;
 	map<Site*, vector<Site*>>::iterator it;
+	map<Site*, vector<Site*>>::iterator eraseMap;
+	map<Site*, vector<Site*>>::iterator mapIt;
 	vector<Site*>::iterator vectIt;
+	vector<Site*>::iterator eraseVect;
 	Site* nearestCorr;
 	static vector<Site*> cycle;
 	Site* prevMove;
+	Site* test;
+	bool exist = false;
+
+	it = adjDisc.begin();
+	while (it != adjDisc.end())
+	{
+		if (it->second.size() <= 1)
+		{
+			eraseMap = it;
+			++it;
+			adjDisc.erase(eraseMap);
+		}
+		else
+			it++;
+		
+	}
+
+	it = adjDisc.begin();
+	while (it != adjDisc.end())
+	{
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			exist = false;
+			test = *vectIt;
+			i = test->i();
+			j = test->j();
+			mapIt = adjDisc.begin();
+			while (mapIt != adjDisc.end())
+			{
+				if (i == mapIt->first->i() && j == mapIt->first->j())
+					exist = true;
+				mapIt++;
+			}
+
+			if (!exist)
+			{
+				eraseVect = vectIt;
+				++vectIt;
+				(it->second).erase(eraseVect);
+			}
+
+			else
+				vectIt++;
+		}
+
+		++it;
+	}
 
 	//if (cycle.empty())
 	//{
 		it = adjDisc.begin();
 		shortestDist = distPlayer[it->first->i()][it->first->j()];
-		if (it->second.size() > 1)
-			nearestCorr = it->first;
+		nearestCorr = it->first;
 		while (it != adjDisc.end())
 		{
 			cout << it->first->i() << " " << it->first->j() << endl;
-			if (distPlayer[it->first->i()][it->first->j()] <= shortestDist && it->second.size() > 1)
+			if (distPlayer[it->first->i()][it->first->j()] <= shortestDist)
 			{
 				shortestDist = distPlayer[it->first->i()][it->first->j()];
 				nearestCorr = it->first;
@@ -274,11 +324,10 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
 	vectIt = it->second.begin();
 	longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
-	if (it->second.size() > 1)
-		nearestCorr = *vectIt;
+	nearestCorr = *vectIt;
 	while (vectIt != it->second.end())
 	{
-		if (distMonster[(*vectIt)->i()][(*vectIt)->j()] >= longestDist && it->second.size() > 1 )
+		if (distMonster[(*vectIt)->i()][(*vectIt)->j()] >= longestDist )
 		{
 			longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
 			nearestCorr = *vectIt;
