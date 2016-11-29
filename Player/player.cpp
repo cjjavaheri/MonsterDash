@@ -168,6 +168,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     map<Site*, vector<Site*>>::iterator adjDiscIt;
     map<Site*, vector<Site*>> adjDisc;
     map<Site*, vector<Site*>> adjConn;
+    map<Site*, vector<Site*>> connectedCycle;
     vector<Site*>::iterator adjDiscVectIt;
     vector<Site*> adjVect;
     vector<Site*>::iterator vectIt;
@@ -218,6 +219,12 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     }
 
 	adjConn = findConnectedComponents(adj);
+	connectedCycle = getCyclesWithinCorridors(adjConn);
+
+	if (!connectedCycle.empty())
+	{
+
+	}
 
 
     if (playfield->isCorridor(player))
@@ -303,6 +310,7 @@ map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site
 
     	}
 
+	/*
 	it = adjConn.begin();
 	while (it != adjConn.end())
 	{
@@ -317,9 +325,68 @@ map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site
 		cout << "--------------" << it->second.size() << endl;
 		it++;
 	}
+	*/
 	return adjConn;
 
 }
+
+map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn)
+{
+	map<Site*, vector<Site*>> cycle;
+	map<Site*, vector<Site*>>::iterator it;
+	vector<Site*>::iterator vectIt;
+	vector<Site*>::iterator trav;
+	vector<Site*> store;
+	Site* site;
+
+	it = adjConn.begin();
+	while (it != adjConn.end())
+	{
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			site = *vectIt;
+			trav = vectIt;
+			store.push_back(*trav);
+			trav++;
+			while (trav != it->second.end())
+			{
+				store.push_back(*trav);
+				if ((*trav)->i() == site->i() && (*trav)->j() == site->j())
+				{
+					cycle.insert({it->first, store});
+				}
+
+				trav++;
+			}
+			
+			store.clear();
+			vectIt++;
+		}
+
+		it++;
+	}
+
+
+		it = cycle.begin();
+	while (it != cycle.end())
+	{
+		cout << "Start----------------------------" << endl;
+		cout << it->first->i() << " " << it->first->j() << endl;
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+			vectIt++;
+		}
+		cout << "--------------" << it->second.size() << endl;
+		it++;
+	}
+
+	return cycle;
+
+}
+
 
 void Player::getMarkedArray(bool **&marked)
 {

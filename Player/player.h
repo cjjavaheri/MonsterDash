@@ -71,6 +71,9 @@ class Player
 
 	void getMarkedArray(bool **&marked);
 
+	map<Site*, vector<Site*>> getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn);
+
+
 
 	
 
