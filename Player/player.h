@@ -67,6 +67,10 @@ class Player
 
 	void run(const Site* player, Site* &nearestCorr, int **&distPlayer, int **&distMonster, vector<Site*> &cycle, map<Site*, vector<Site*>> &adjDisc);
 
+	map<Site*, vector<Site*>> findConnectedComponents(map<Site*, vector<Site*>> adj);
+
+	void getMarkedArray(bool **&marked);
+
 
 	
 

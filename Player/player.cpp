@@ -167,6 +167,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     map<Site*, vector<Site*>>::iterator it;
     map<Site*, vector<Site*>>::iterator adjDiscIt;
     map<Site*, vector<Site*>> adjDisc;
+    map<Site*, vector<Site*>> adjConn;
     vector<Site*>::iterator adjDiscVectIt;
     vector<Site*> adjVect;
     vector<Site*>::iterator vectIt;
@@ -216,7 +217,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
         }
     }
 
-
+	adjConn = findConnectedComponents(adj);
 
 
     if (playfield->isCorridor(player))
@@ -231,6 +232,109 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     }
 
 
+}
+
+map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site*>> adj)
+{
+	map<Site*, vector<Site*>> adjConn;
+	map<Site*, vector<Site*>>::iterator it;
+	map<Site*, vector<Site*>>::iterator trav;
+	map<Site*, vector<Site*>>::iterator eraseMap;
+	vector<Site*> connectedComp;
+	vector<Site*>::iterator vectIt;
+	stack<Site*> myStack;
+	Site* site;
+	int i;
+	int j;
+	bool **marked = nullptr;
+
+	getMarkedArray(marked);
+
+	it = adj.begin();
+	while (it != adj.end())
+	{
+		myStack.push(it->first);
+		while (!myStack.empty())
+		{
+			site = myStack.top();
+			i = site->i();
+			j = site->j();
+			myStack.pop();
+
+			if (!marked[i][j])
+				marked[i][j] = true;
+
+			// Visit adjacent vertices.
+			trav = adj.find(site);
+			vectIt = trav->second.begin();
+			while (vectIt != trav->second.end())
+			{
+				i = (*vectIt)->i();
+				j = (*vectIt)->j();
+				if (!marked[i][j])
+				{
+					myStack.push(*vectIt);
+					connectedComp.push_back(*vectIt);
+				}
+
+				vectIt++;
+			}
+			
+		}
+
+		adjConn.insert({it->first, connectedComp});
+		connectedComp.clear();
+
+		it++;
+	}
+
+
+	   it = adjConn.begin();
+    	while (it != adjConn.end())
+    	{
+       		if (it->second.size() == 0)
+        	{
+            		eraseMap = it;
+            		++it;
+            		adjConn.erase(eraseMap);
+        	}
+        	else
+            		it++;
+
+    	}
+
+	it = adjConn.begin();
+	while (it != adjConn.end())
+	{
+		cout << "Start----------------------------" << endl;
+		cout << it->first->i() << " " << it->first->j() << endl;
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+			vectIt++;
+		}
+		cout << "--------------" << it->second.size() << endl;
+		it++;
+	}
+	return adjConn;
+
+}
+
+void Player::getMarkedArray(bool **&marked)
+{
+	int i;
+	int j;
+
+    // Create a 2D array of bools to mark visited vertices.
+    marked = new (nothrow) bool *[N];
+    for (i = 0; i < N; i++)
+        marked[i] = new (nothrow) bool [N];
+
+    // Initialize them all as false.
+    for (i = 0; i < N; i++)
+        for (j = 0; j < N; j++)
+            marked[i][j] = false;
 }
 
 Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
