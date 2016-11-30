@@ -168,9 +168,9 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 {
     map<Site*, vector<Site*>>::iterator it;
     map<Site*, vector<Site*>>::iterator adjDiscIt;
-    map<Site*, vector<Site*>> adjDisc;
-    map<Site*, vector<Site*>> adjConn;
-    map<Site*, vector<Site*>> connectedCycle;
+    static map<Site*, vector<Site*>> adjDisc;
+    static map<Site*, vector<Site*>> adjConn;
+    static map<Site*, vector<Site*>> connectedCycle;
     vector<Site*>::iterator adjDiscVectIt;
     vector<Site*> adjVect;
     vector<Site*>::iterator vectIt;
@@ -218,9 +218,11 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
         }
     }
+	if (adjConn.empty())
+		adjConn = findConnectedComponents(adj);
 
-	adjConn = findConnectedComponents(adj);
-	connectedCycle = getCyclesWithinCorridors(adjConn);
+	if (connectedCycle.empty())
+		connectedCycle = getCyclesWithinCorridors(adjConn);
 
 	if (!connectedCycle.empty())
 	{
@@ -1247,6 +1249,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
 	unsigned int i;
 	unsigned int j;
 	int longestDist;
+	int shortestDist;
 
 	inCycle = isPlayerInCorridorCycle(connectedCycle, player);
 
@@ -1258,10 +1261,13 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
 	while (it != connectedCycle.end())
 	{
 		vectIt = it->second.begin();
+		shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+		nextMove = *vectIt;
 		while (vectIt != it->second.end())
 		{
-			if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < distMonster[(*vectIt)->i()][(*vectIt)->j()])
+			if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < shortestDist)
 			{
+				shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
 				nextMove = *vectIt;
 			}
 
