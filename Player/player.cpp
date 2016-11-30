@@ -328,6 +328,7 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 	vector<Site*> store;
 	Site* site;
 
+
 	it = adjConn.begin();
 	while (it != adjConn.end())
 	{
@@ -343,6 +344,7 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 				store.push_back(*trav);
 				if ((*trav)->i() == site->i() && (*trav)->j() == site->j())
 				{
+					store.push_back(it->first);
 					cycle.insert({it->first, store});
 				}
 
