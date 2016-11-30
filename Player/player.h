@@ -81,6 +81,17 @@ class Player
 	bool isPlayerInCorridorCycle(map<Site*, vector<Site*>> connectedCycle, const Site* player);
 
 
+	map<Site*,vector<Site*>> checkForConnectedDeadEnds(map<Site*, vector<Site*>> adjConn);
+
+	bool hasAdjacentRoom(Site* site);
+
+	Site* findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster);
+
+
+	void searchAllAdjCorrSites(vector<Site*> &vectDisc, Site* site, int &i, int &j);
+
+	vector<Site*> getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player);
+
 
 	
 
