@@ -248,8 +248,11 @@ map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site
     int j;
     bool **marked = nullptr;
 
+	// Get a 2D array of bools all marked as false.
     getMarkedArray(marked);
 
+	// Perform a depth first search on all of the adjacent sites.
+	// This gives the connected components.
     it = adj.begin();
     while (it != adj.end())
     {
@@ -281,7 +284,8 @@ map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site
             }
 
         }
-
+	// Insert each connected component with along with a vertex
+	// in that component.
         adjConn.insert({it->first, connectedComp});
         connectedComp.clear();
 
@@ -289,6 +293,7 @@ map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site
     }
 
 
+	// Delete any components that don't have any adjacent vertices.
     it = adjConn.begin();
     while (it != adjConn.end())
     {
@@ -319,9 +324,24 @@ map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site
     	it++;
     }
     */
+
+    freeMarkedArray(marked);
     return adjConn;
 
 }
+
+void Player::freeMarkedArray(bool **&marked)
+{
+
+	int i;
+
+    for (i = 0; i < N; i++)
+        delete[] marked[i];
+
+    delete[] marked;
+}
+
+
 
 map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn)
 {
@@ -332,17 +352,20 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
     vector<Site*> store;
     Site* site;
 
-
+	// For each connected component, look at all of the vertices in that component.
     it = adjConn.begin();
     while (it != adjConn.end())
     {
         vectIt = it->second.begin();
+	// For each vertex in a particular component, determine if a particular vertex
+	// is found twice.
         while (vectIt != it->second.end())
         {
             site = *vectIt;
             trav = vectIt;
             store.push_back(*trav);
             trav++;
+		// If a particular vertex is found twice, then it is a cycle.
             while (trav != it->second.end())
             {
                 store.push_back(*trav);
@@ -1228,11 +1251,6 @@ Site* Player::returnToStart(map<Site*, vector<Site*>> &adj, int **&distPlayer, S
         else
         {
 
-            /*
-            nextMove = new Site(player->i(), player->j());
-            allocatedMemory.push_back(nextMove);
-            */
-
             return nextMove;
         }
 
@@ -1253,6 +1271,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
     int longestDist;
     int shortestDist;
 
+	// Determine if the player is on a site in the cycle.
     inCycle = isPlayerInCorridorCycle(connectedCycle, player);
 
     cout << "inCycle: " << inCycle << endl;
@@ -1260,6 +1279,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
     if (!inCycle)
     {
 
+	// If only one cycle, find shortest path to that cycle.
         if (connectedCycle.size() == 1)
         {
             it = connectedCycle.begin();
@@ -1286,6 +1306,9 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
 
         else
         {
+		// There's more than one cycle, so choose the cycle that the player
+		// can reach by seeing if the cycle can be reached in less moves
+		// than the monster can reach it with.
             it = connectedCycle.begin();
             while (it != connectedCycle.end())
             {
@@ -1313,6 +1336,9 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
     {
         i = player->i();
         j = player->j();
+
+	// If player is on a site in the cycle, then
+	// first get list of adjacent vertices in cycle.
         it = connectedCycle.begin();
         while (it != connectedCycle.end())
         {
@@ -1330,6 +1356,8 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
             it++;
         }
 
+	// Now choose a site in the cycle that's adjacent to the player
+	// and that's the farthest distance away from the monster.
         it = adjList.begin();
         while (it != adjList.end())
         {
@@ -1354,6 +1382,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
         }
     }
 
+	// Calculate a path to the final destination.
     i = nextMove->i();
     j = nextMove->j();
 
@@ -1396,6 +1425,8 @@ bool Player::isPlayerInCorridorCycle(map<Site*, vector<Site*>> connectedCycle, c
     i = player->i();
     j = player->j();
 
+	// If the player is on a site which is apart of a cycle
+	// then return true.
     it = connectedCycle.begin();
     while (it != connectedCycle.end())
     {

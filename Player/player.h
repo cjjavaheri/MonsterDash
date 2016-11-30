@@ -74,6 +74,8 @@ class Player
 
 	void getMarkedArray(bool **&marked);
 
+	void freeMarkedArray(bool **&marked);
+
 	map<Site*, vector<Site*>> getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn);
 
 	bool isPlayerInCorridorCycle(map<Site*, vector<Site*>> connectedCycle, const Site* player);
