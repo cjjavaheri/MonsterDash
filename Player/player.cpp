@@ -218,173 +218,175 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
         }
     }
-	if (adjConn.empty())
-		adjConn = findConnectedComponents(adj);
+    if (adjConn.empty())
+        adjConn = findConnectedComponents(adj);
 
-	if (connectedCycle.empty())
-		connectedCycle = getCyclesWithinCorridors(adjConn);
+    if (connectedCycle.empty())
+        connectedCycle = getCyclesWithinCorridors(adjConn);
 
-	if (!connectedCycle.empty())
-	{
-		return findCorridorCycle(connectedCycle, distMonster, distPlayer, prevPlayer, player, monster);
-	}
+    if (!connectedCycle.empty())
+    {
+        return findCorridorCycle(connectedCycle, distMonster, distPlayer, prevPlayer, player, monster);
+    }
+
+    cout << "connected cycle is empty" << endl;
 
 
 }
 
 map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site*>> adj)
 {
-	map<Site*, vector<Site*>> adjConn;
-	map<Site*, vector<Site*>>::iterator it;
-	map<Site*, vector<Site*>>::iterator trav;
-	map<Site*, vector<Site*>>::iterator eraseMap;
-	vector<Site*> connectedComp;
-	vector<Site*>::iterator vectIt;
-	stack<Site*> myStack;
-	Site* site;
-	int i;
-	int j;
-	bool **marked = nullptr;
+    map<Site*, vector<Site*>> adjConn;
+    map<Site*, vector<Site*>>::iterator it;
+    map<Site*, vector<Site*>>::iterator trav;
+    map<Site*, vector<Site*>>::iterator eraseMap;
+    vector<Site*> connectedComp;
+    vector<Site*>::iterator vectIt;
+    stack<Site*> myStack;
+    Site* site;
+    int i;
+    int j;
+    bool **marked = nullptr;
 
-	getMarkedArray(marked);
+    getMarkedArray(marked);
 
-	it = adj.begin();
-	while (it != adj.end())
-	{
-		myStack.push(it->first);
-		while (!myStack.empty())
-		{
-			site = myStack.top();
-			i = site->i();
-			j = site->j();
-			myStack.pop();
+    it = adj.begin();
+    while (it != adj.end())
+    {
+        myStack.push(it->first);
+        while (!myStack.empty())
+        {
+            site = myStack.top();
+            i = site->i();
+            j = site->j();
+            myStack.pop();
 
-			if (!marked[i][j])
-				marked[i][j] = true;
+            if (!marked[i][j])
+                marked[i][j] = true;
 
-			// Visit adjacent vertices.
-			trav = adj.find(site);
-			vectIt = trav->second.begin();
-			while (vectIt != trav->second.end())
-			{
-				i = (*vectIt)->i();
-				j = (*vectIt)->j();
-				if (!marked[i][j])
-				{
-					myStack.push(*vectIt);
-					connectedComp.push_back(*vectIt);
-				}
+            // Visit adjacent vertices.
+            trav = adj.find(site);
+            vectIt = trav->second.begin();
+            while (vectIt != trav->second.end())
+            {
+                i = (*vectIt)->i();
+                j = (*vectIt)->j();
+                if (!marked[i][j])
+                {
+                    myStack.push(*vectIt);
+                    connectedComp.push_back(*vectIt);
+                }
 
-				vectIt++;
-			}
-			
-		}
+                vectIt++;
+            }
 
-		adjConn.insert({it->first, connectedComp});
-		connectedComp.clear();
+        }
 
-		it++;
-	}
+        adjConn.insert({it->first, connectedComp});
+        connectedComp.clear();
+
+        it++;
+    }
 
 
-	   it = adjConn.begin();
-    	while (it != adjConn.end())
+    it = adjConn.begin();
+    while (it != adjConn.end())
+    {
+        if (it->second.size() == 0)
+        {
+            eraseMap = it;
+            ++it;
+            adjConn.erase(eraseMap);
+        }
+        else
+            it++;
+
+    }
+
+    /*
+    it = adjConn.begin();
+    while (it != adjConn.end())
+    {
+    	cout << "Start----------------------------" << endl;
+    	cout << it->first->i() << " " << it->first->j() << endl;
+    	vectIt = it->second.begin();
+    	while (vectIt != it->second.end())
     	{
-       		if (it->second.size() == 0)
-        	{
-            		eraseMap = it;
-            		++it;
-            		adjConn.erase(eraseMap);
-        	}
-        	else
-            		it++;
-
+    		cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+    		vectIt++;
     	}
-
-	/*
-	it = adjConn.begin();
-	while (it != adjConn.end())
-	{
-		cout << "Start----------------------------" << endl;
-		cout << it->first->i() << " " << it->first->j() << endl;
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
-			vectIt++;
-		}
-		cout << "--------------" << it->second.size() << endl;
-		it++;
-	}
-	*/
-	return adjConn;
+    	cout << "--------------" << it->second.size() << endl;
+    	it++;
+    }
+    */
+    return adjConn;
 
 }
 
 map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn)
 {
-	map<Site*, vector<Site*>> cycle;
-	map<Site*, vector<Site*>>::iterator it;
-	vector<Site*>::iterator vectIt;
-	vector<Site*>::iterator trav;
-	vector<Site*> store;
-	Site* site;
+    map<Site*, vector<Site*>> cycle;
+    map<Site*, vector<Site*>>::iterator it;
+    vector<Site*>::iterator vectIt;
+    vector<Site*>::iterator trav;
+    vector<Site*> store;
+    Site* site;
 
 
-	it = adjConn.begin();
-	while (it != adjConn.end())
-	{
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			site = *vectIt;
-			trav = vectIt;
-			store.push_back(*trav);
-			trav++;
-			while (trav != it->second.end())
-			{
-				store.push_back(*trav);
-				if ((*trav)->i() == site->i() && (*trav)->j() == site->j())
-				{
-					store.push_back(it->first);
-					cycle.insert({it->first, store});
-				}
+    it = adjConn.begin();
+    while (it != adjConn.end())
+    {
+        vectIt = it->second.begin();
+        while (vectIt != it->second.end())
+        {
+            site = *vectIt;
+            trav = vectIt;
+            store.push_back(*trav);
+            trav++;
+            while (trav != it->second.end())
+            {
+                store.push_back(*trav);
+                if ((*trav)->i() == site->i() && (*trav)->j() == site->j())
+                {
+                    store.push_back(it->first);
+                    cycle.insert({it->first, store});
+                }
 
-				trav++;
-			}
-			
-			store.clear();
-			vectIt++;
-		}
+                trav++;
+            }
 
-		it++;
-	}
+            store.clear();
+            vectIt++;
+        }
+
+        it++;
+    }
 
 
-		it = cycle.begin();
-	while (it != cycle.end())
-	{
-		cout << "Start----------------------------" << endl;
-		cout << it->first->i() << " " << it->first->j() << endl;
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
-			vectIt++;
-		}
-		cout << "--------------" << it->second.size() << endl;
-		it++;
-	}
+    it = cycle.begin();
+    while (it != cycle.end())
+    {
+        cout << "Start----------------------------" << endl;
+        cout << it->first->i() << " " << it->first->j() << endl;
+        vectIt = it->second.begin();
+        while (vectIt != it->second.end())
+        {
+            cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+            vectIt++;
+        }
+        cout << "--------------" << it->second.size() << endl;
+        it++;
+    }
 
-	return cycle;
+    return cycle;
 
 }
 
 
 void Player::getMarkedArray(bool **&marked)
 {
-	int i;
-	int j;
+    int i;
+    int j;
 
     // Create a 2D array of bools to mark visited vertices.
     marked = new (nothrow) bool *[N];
@@ -1241,147 +1243,175 @@ Site* Player::returnToStart(map<Site*, vector<Site*>> &adj, int **&distPlayer, S
 
 Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
 {
-	map<Site*, vector<Site*>>::iterator it;
-	vector<Site*>::iterator vectIt;
-	Site* nextMove = nullptr;
-	map<Site*, vector<Site*>> adjList;
-	bool inCycle;
-	unsigned int i;
-	unsigned int j;
-	int longestDist;
-	int shortestDist;
+    map<Site*, vector<Site*>>::iterator it;
+    vector<Site*>::iterator vectIt;
+    Site* nextMove = nullptr;
+    map<Site*, vector<Site*>> adjList;
+    bool inCycle;
+    unsigned int i;
+    unsigned int j;
+    int longestDist;
+    int shortestDist;
 
-	inCycle = isPlayerInCorridorCycle(connectedCycle, player);
+    inCycle = isPlayerInCorridorCycle(connectedCycle, player);
 
-	cout << "inCycle: " << inCycle << endl;
+    cout << "inCycle: " << inCycle << endl;
 
-	if (!inCycle)
-	{
-	it = connectedCycle.begin();
-	while (it != connectedCycle.end())
-	{
-		vectIt = it->second.begin();
-		shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
-		nextMove = *vectIt;
-		while (vectIt != it->second.end())
-		{
-			if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < shortestDist)
-			{
-				shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
-				nextMove = *vectIt;
-			}
+    if (!inCycle)
+    {
 
-			vectIt++;
-		}
-
-		it++;
-	}
-
-	}
-
-	else
-	{
-		i = player->i();
-		j = player->j();
-		it = connectedCycle.begin();
-		while (it != connectedCycle.end())
-		{
-			vectIt = it->second.begin();
-			while (vectIt != it->second.end())
-			{
-				if ((*vectIt)->i() == i && (*vectIt)->j() == j)
-				{
-					adjList = findAdjLists(it->second);
-				}
-
-				vectIt++;
-			}
-
-			it++;
-		}
-
-		it = adjList.begin();
-		while (it != adjList.end())
-		{
-			if (i == it->first->i() && j == it->first->j())
-			{
-				longestDist = distMonster[i][j];
-				nextMove = it->first;
-				vectIt = it->second.begin();
-				while (vectIt != it->second.end())
-				{
-					if (distMonster[(*vectIt)->i()][(*vectIt)->j()] > longestDist)
-					{
-						longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
-						nextMove = *vectIt;
-					}
-
-					vectIt++;
-				}
-			}
-
-			it++;
-		}
-	}
-
-	i = nextMove->i();
-	j = nextMove->j();
-
-	if (i == player->i() && j == player->j())
-		return nextMove;
-
-
-	        // Starting distance is not 1
-        if (distPlayer[i][j] != 1)
+        if (connectedCycle.size() == 1)
         {
-
-            while (distPlayer[i][j] != 1)
+            it = connectedCycle.begin();
+            while (it != connectedCycle.end())
             {
-                nextMove = prevPlayer[i][j];
-                i = nextMove->i();
-                j = nextMove->j();
+                vectIt = it->second.begin();
+                shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+                nextMove = *vectIt;
+                while (vectIt != it->second.end())
+                {
+                    if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < shortestDist)
+                    {
+                        shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+                        nextMove = *vectIt;
+                    }
+
+                    vectIt++;
+                }
+
+                it++;
             }
 
-            return nextMove;
-
         }
 
-        // Starting distance is 1 ; therefore, the player only has to take
-	// one more move to reach the final destination.
         else
         {
+            it = connectedCycle.begin();
+            while (it != connectedCycle.end())
+            {
+                vectIt = it->second.begin();
+                while (vectIt != it->second.end())
+                {
+                    if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < distMonster[(*vectIt)->i()][(*vectIt)->j()])
+                    {
+                        nextMove = *vectIt;
+                    }
 
-            return nextMove;
+                    vectIt++;
+                }
+
+                it++;
+
+
+            }
+
         }
+
+    }
+
+    else
+    {
+        i = player->i();
+        j = player->j();
+        it = connectedCycle.begin();
+        while (it != connectedCycle.end())
+        {
+            vectIt = it->second.begin();
+            while (vectIt != it->second.end())
+            {
+                if ((*vectIt)->i() == i && (*vectIt)->j() == j)
+                {
+                    adjList = findAdjLists(it->second);
+                }
+
+                vectIt++;
+            }
+
+            it++;
+        }
+
+        it = adjList.begin();
+        while (it != adjList.end())
+        {
+            if (i == it->first->i() && j == it->first->j())
+            {
+                longestDist = distMonster[i][j];
+                nextMove = it->first;
+                vectIt = it->second.begin();
+                while (vectIt != it->second.end())
+                {
+                    if (distMonster[(*vectIt)->i()][(*vectIt)->j()] > longestDist)
+                    {
+                        longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
+                        nextMove = *vectIt;
+                    }
+
+                    vectIt++;
+                }
+            }
+
+            it++;
+        }
+    }
+
+    i = nextMove->i();
+    j = nextMove->j();
+
+    if (i == player->i() && j == player->j())
+        return nextMove;
+
+
+    // Starting distance is not 1
+    if (distPlayer[i][j] != 1)
+    {
+
+        while (distPlayer[i][j] != 1)
+        {
+            nextMove = prevPlayer[i][j];
+            i = nextMove->i();
+            j = nextMove->j();
+        }
+
+        return nextMove;
+
+    }
+
+    // Starting distance is 1 ; therefore, the player only has to take
+    // one more move to reach the final destination.
+    else
+    {
+
+        return nextMove;
+    }
 
 }
 
 bool Player::isPlayerInCorridorCycle(map<Site*, vector<Site*>> connectedCycle, const Site* player)
 {
-		map<Site*, vector<Site*>>::iterator it;
-		vector<Site*>::iterator vectIt;
-		unsigned int i;
-		unsigned int j;
+    map<Site*, vector<Site*>>::iterator it;
+    vector<Site*>::iterator vectIt;
+    unsigned int i;
+    unsigned int j;
 
-		i = player->i();
-		j = player->j();
+    i = player->i();
+    j = player->j();
 
-		it = connectedCycle.begin();
-	while (it != connectedCycle.end())
-	{
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			if ((*vectIt)->i() == i && (*vectIt)->j() == j)
-				return true;
+    it = connectedCycle.begin();
+    while (it != connectedCycle.end())
+    {
+        vectIt = it->second.begin();
+        while (vectIt != it->second.end())
+        {
+            if ((*vectIt)->i() == i && (*vectIt)->j() == j)
+                return true;
 
-			vectIt++;
-		}
+            vectIt++;
+        }
 
-		it++;
-	}
+        it++;
+    }
 
-	return false;
+    return false;
 
 }
 
