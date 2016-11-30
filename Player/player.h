@@ -19,11 +19,14 @@ class Player
       const Site* move();
 
 	vector<Site*> findCorridors(vector<Site*> &corridors);
-	map<Site*, vector<Site*>> findAdjLists(map<Site*, vector<Site*>> &adj, vector<Site*> &corridors);
+
+	map<Site*, vector<Site*>> findAdjLists(vector<Site*> corridors);
 
 
 	       void bfs(bool **&marked, Site* **&prev, int **&dist, const Site* player, vector<Site*> &allocatedMemory);
+
        void allocateStorage(bool **&marked, Site* **&prev, int **&dist);
+
        void checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, queue<Site*> &myqueue, Site* temp, vector<Site*> &allocatedMemory);
 
 
@@ -37,7 +40,7 @@ class Player
 
 
 
-	Site* findCorridorCycle(map<Site*, vector<Site*>> &adj, int **&distMonster, vector<Site*> &allocatedMemory, vector<Site*> &cycle, Site* &start, const Site* player);
+	Site* findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster);
 
 
 
@@ -72,6 +75,8 @@ class Player
 	void getMarkedArray(bool **&marked);
 
 	map<Site*, vector<Site*>> getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn);
+
+	bool isPlayerInCorridorCycle(map<Site*, vector<Site*>> connectedCycle, const Site* player);
 
 
 

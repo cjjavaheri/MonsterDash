@@ -43,7 +43,7 @@ const Site* Player::move()
     findCorridors(corridors);
 
     // Get the list of adjacent corridor sites to each corridor site.
-    adj = findAdjLists(adj, corridors);
+    adj = findAdjLists(corridors);
 
     /*
     it = adj.begin();
@@ -91,13 +91,15 @@ const Site* Player::move()
     */
 }
 
-map<Site*, vector<Site*>> Player::findAdjLists(map<Site*, vector<Site*>> &adj, vector<Site*> &corridors)
+map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
 {
     vector<Site*>::iterator it;
     vector<Site*>::iterator curr;
     vector<Site*> adjacentVertices;
     Site* currSite;
     Site* compareSite;
+    map<Site*, vector<Site*>> adj;
+
     curr = corridors.begin();
     // For each corridor site, check all of the corridor sites to see which ones are adjacent.
     while (curr != corridors.end())
@@ -173,7 +175,6 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     vector<Site*> adjVect;
     vector<Site*>::iterator vectIt;
     Site* nextMove = nullptr;
-    static Site* start = nullptr;
     static vector<Site*> cycle;
     bool hasCorridors;
     bool hasWalls;
@@ -223,20 +224,8 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
 	if (!connectedCycle.empty())
 	{
-
+		return findCorridorCycle(connectedCycle, distMonster, distPlayer, prevPlayer, player, monster);
 	}
-
-
-    if (playfield->isCorridor(player))
-    {
-        return findCorridorCycle(adj, distMonster, allocatedMemory, cycle, start, player);
-    }
-
-    if (playfield->isRoom(player))
-    {
-
-        return returnToStart(adj, distPlayer, prevPlayer, allocatedMemory, start, player);
-    }
 
 
 }
@@ -1246,78 +1235,145 @@ Site* Player::returnToStart(map<Site*, vector<Site*>> &adj, int **&distPlayer, S
 
 }
 
-Site* Player::findCorridorCycle(map<Site*, vector<Site*>> &adj, int **&distMonster, vector<Site*> &allocatedMemory, vector<Site*> &cycle, Site* &start, const Site* player)
+Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
 {
-    Site* nextMove = nullptr;
-    map<Site*, vector<Site*>>::iterator it;
-    vector<Site*> adjVect;
-    vector<Site*>::iterator vectIt;
-    unsigned int a;
-    unsigned int b;
-    unsigned int i;
-    unsigned int j;
-    int longestDist;
+	map<Site*, vector<Site*>>::iterator it;
+	vector<Site*>::iterator vectIt;
+	Site* nextMove = nullptr;
+	map<Site*, vector<Site*>> adjList;
+	bool inCycle;
+	unsigned int i;
+	unsigned int j;
+	int longestDist;
+
+	inCycle = isPlayerInCorridorCycle(connectedCycle, player);
+
+	cout << "inCycle: " << inCycle << endl;
+
+	if (!inCycle)
+	{
+	it = connectedCycle.begin();
+	while (it != connectedCycle.end())
+	{
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < distMonster[(*vectIt)->i()][(*vectIt)->j()])
+			{
+				nextMove = *vectIt;
+			}
+
+			vectIt++;
+		}
+
+		it++;
+	}
+
+	}
+
+	else
+	{
+		i = player->i();
+		j = player->j();
+		it = connectedCycle.begin();
+		while (it != connectedCycle.end())
+		{
+			vectIt = it->second.begin();
+			while (vectIt != it->second.end())
+			{
+				if ((*vectIt)->i() == i && (*vectIt)->j() == j)
+				{
+					adjList = findAdjLists(it->second);
+				}
+
+				vectIt++;
+			}
+
+			it++;
+		}
+
+		it = adjList.begin();
+		while (it != adjList.end())
+		{
+			if (i == it->first->i() && j == it->first->j())
+			{
+				longestDist = distMonster[i][j];
+				nextMove = it->first;
+				vectIt = it->second.begin();
+				while (vectIt != it->second.end())
+				{
+					if (distMonster[(*vectIt)->i()][(*vectIt)->j()] > longestDist)
+					{
+						longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
+						nextMove = *vectIt;
+					}
+
+					vectIt++;
+				}
+			}
+
+			it++;
+		}
+	}
+
+	i = nextMove->i();
+	j = nextMove->j();
+
+	if (i == player->i() && j == player->j())
+		return nextMove;
 
 
-    longestDist = distMonster[player->i()][player->j()];
-    nextMove = new Site(player->i(), player->j());
-    allocatedMemory.push_back(nextMove);
-
-    i = player->i();
-    j = player->j();
-
-    // Find the site that the player is located on.
-    it = adj.begin();
-    while (it != adj.end() && ((it->first)->i() != i || (it->first)->j() != j))
-    {
-        it++;
-    }
-
-    adjVect = it->second;
-    vectIt = adjVect.begin();
-
-    // Find the adjacent site which has the largest distance from the monster.
-    while (vectIt != adjVect.end())
-    {
-        if (distMonster[(*vectIt)->i()][(*vectIt)->j()] > longestDist)
+	        // Starting distance is not 1
+        if (distPlayer[i][j] != 1)
         {
-            longestDist = distMonster[(*vectIt)->i()][(*vectIt)->j()];
-            nextMove = new Site((*vectIt)->i(),(*vectIt)->j());
+
+            while (distPlayer[i][j] != 1)
+            {
+                nextMove = prevPlayer[i][j];
+                i = nextMove->i();
+                j = nextMove->j();
+            }
+
+            return nextMove;
+
         }
 
-        vectIt++;
-    }
+        // Starting distance is 1 ; therefore, the player only has to take
+	// one more move to reach the final destination.
+        else
+        {
 
-    // If a site is not found, try to find a room site to find the
-    // starting corridor site of the cycle.
-    if (nextMove->i() == i && nextMove->j() == j)
-    {
-        for (a = player->i() - 1; a < player->i() + 2; a++)
-            for (b = player->j() - 1; b < player->j() + 2; b++)
-            {
-                if (a == player->i() || b == player->j())
-                {
-                    if (playfield->isRoom(a, b))
-                    {
-                        nextMove = new Site(a, b);
-                        allocatedMemory.push_back(nextMove);
-                        // Initialize start to starting corridor site of cycle.
-                        if (start == nullptr && !cycle.empty())
-                        {
-                            start = cycle.front();
-                            start = new Site(start->i(), start->j());
-                            cycle.clear();
-                        }
-                        if (cycle.empty())
-                        {
-                            return nextMove;
-                        }
-                    }
-                }
-            }
-    }
-    cycle.push_back(nextMove);
-    return nextMove;
+            return nextMove;
+        }
+
+}
+
+bool Player::isPlayerInCorridorCycle(map<Site*, vector<Site*>> connectedCycle, const Site* player)
+{
+		map<Site*, vector<Site*>>::iterator it;
+		vector<Site*>::iterator vectIt;
+		unsigned int i;
+		unsigned int j;
+
+		i = player->i();
+		j = player->j();
+
+		it = connectedCycle.begin();
+	while (it != connectedCycle.end())
+	{
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			if ((*vectIt)->i() == i && (*vectIt)->j() == j)
+				return true;
+
+			vectIt++;
+		}
+
+		it++;
+	}
+
+	return false;
 
 }
 
