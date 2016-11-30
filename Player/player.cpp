@@ -421,55 +421,55 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
                 nextMove = decIt->second;
             }
 
-		if (distMonster[nextMove->i()][nextMove->j()] < distPlayer[nextMove->i()][nextMove->j()])
-		{
-			i = player->i();
-			j = player->j();
+            if (distMonster[nextMove->i()][nextMove->j()] < distPlayer[nextMove->i()][nextMove->j()])
+            {
+                i = player->i();
+                j = player->j();
 
-			cout << "i: " << i << endl;
-			cout << "j: " << j << endl;
+                cout << "i: " << i << endl;
+                cout << "j: " << j << endl;
 
-			longestDist = distMonster[i][j];
+                longestDist = distMonster[i][j];
 
-			if (playfield->isCorridor(i + 1, j))
-			{
-				if (distMonster[i + 1][j] > longestDist)
-				{
-					nextMove = new Site(i + 1, j);
-					longestDist = distMonster[i + 1][j];
-				}
-			}
+                if (playfield->isCorridor(i + 1, j))
+                {
+                    if (distMonster[i + 1][j] > longestDist)
+                    {
+                        nextMove = new Site(i + 1, j);
+                        longestDist = distMonster[i + 1][j];
+                    }
+                }
 
-			if (playfield->isCorridor(i - 1, j))
-			{
-				if (distMonster[i - 1][j] > longestDist)
-				{
-					nextMove = new Site(i - 1, j);
-					longestDist = distMonster[i - 1][j];
-				}
-			}
+                if (playfield->isCorridor(i - 1, j))
+                {
+                    if (distMonster[i - 1][j] > longestDist)
+                    {
+                        nextMove = new Site(i - 1, j);
+                        longestDist = distMonster[i - 1][j];
+                    }
+                }
 
-			if (playfield->isCorridor(i, j + 1))
-			{
-				if (distMonster[i][j + 1] > longestDist)
-				{
-					nextMove = new Site(i, j + 1);
-					longestDist = distMonster[i][j + 1];
-				}
-			}
+                if (playfield->isCorridor(i, j + 1))
+                {
+                    if (distMonster[i][j + 1] > longestDist)
+                    {
+                        nextMove = new Site(i, j + 1);
+                        longestDist = distMonster[i][j + 1];
+                    }
+                }
 
-			if (playfield->isCorridor(i, j - 1))
-			{
-				if (distMonster[i][j - 1] > longestDist)
-				{
-					nextMove = new Site(i, j - 1);
-					longestDist = distMonster[i][j - 1];
-				}
-			}
+                if (playfield->isCorridor(i, j - 1))
+                {
+                    if (distMonster[i][j - 1] > longestDist)
+                    {
+                        nextMove = new Site(i, j - 1);
+                        longestDist = distMonster[i][j - 1];
+                    }
+                }
 
-			cout << nextMove->i() << " " << nextMove->j() << endl;
-		
-		}
+                cout << nextMove->i() << " " << nextMove->j() << endl;
+
+            }
 
 
         }
