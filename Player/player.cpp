@@ -345,6 +345,63 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
         else
         {
 
+		nextMove = chooseNextCorridor(cycleBetweenRooms, distPlayer, distMonster, player);
+        }
+    }
+
+
+    // Calculate a path to the final destination.
+    i = nextMove->i();
+    j = nextMove->j();
+
+    if (i == player->i() && j == player->j())
+        return nextMove;
+
+
+    // Starting distance is not 1
+    if (distPlayer[i][j] != 1)
+    {
+
+        while (distPlayer[i][j] != 1)
+        {
+            nextMove = prevPlayer[i][j];
+            i = nextMove->i();
+            j = nextMove->j();
+        }
+
+        return nextMove;
+
+    }
+
+    // Starting distance is 1 ; therefore, the player only has to take
+    // one more move to reach the final destination.
+    else
+    {
+
+        return nextMove;
+    }
+}
+
+Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, int **&distPlayer,  int **&distMonster, const Site* player)
+{
+
+    vector<Site*> corridors;
+    vector<Site*>::iterator vectIt;
+    map<Site*, vector<Site*>>::iterator it;
+    map<Site*, vector<Site*>> adjList;
+    static vector<Site*> move;
+    multimap <int, Site*> decisions;
+    multimap<int, Site*>::iterator decIt;
+    multimap<int, Site*>::iterator erase;
+    Site* nextMove = nullptr;
+    unsigned int i = player->i();
+    unsigned int j = player->j();
+    int longestDist;
+
+        longestDist = distMonster[i][j];
+        nextMove = new Site(i, j);
+
+	
             it = cycleBetweenRooms.begin();
             while (it != cycleBetweenRooms.end())
             {
@@ -471,41 +528,8 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
             }
 
+		return nextMove;
 
-        }
-    }
-
-
-    // Calculate a path to the final destination.
-    i = nextMove->i();
-    j = nextMove->j();
-
-    if (i == player->i() && j == player->j())
-        return nextMove;
-
-
-    // Starting distance is not 1
-    if (distPlayer[i][j] != 1)
-    {
-
-        while (distPlayer[i][j] != 1)
-        {
-            nextMove = prevPlayer[i][j];
-            i = nextMove->i();
-            j = nextMove->j();
-        }
-
-        return nextMove;
-
-    }
-
-    // Starting distance is 1 ; therefore, the player only has to take
-    // one more move to reach the final destination.
-    else
-    {
-
-        return nextMove;
-    }
 }
 
 vector<Site*> Player::getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player )

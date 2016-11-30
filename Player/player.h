@@ -92,7 +92,7 @@ class Player
 
 	vector<Site*> getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player);
 
-
+	Site* chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, int **&distPlayer,  int **&distMonster, const Site* player);
 	
 
 };
