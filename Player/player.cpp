@@ -857,7 +857,10 @@ void Player::freeMarkedArray(bool **&marked)
 map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn)
 {
     map<Site*, vector<Site*>> cycle;
+    map<Site*, vector<Site*>> adjList;
+    map<Site*, vector<Site*>>::iterator adjIt;
     map<Site*, vector<Site*>>::iterator it;
+    vector<Site*>::iterator erase;
     vector<Site*>::iterator vectIt;
     vector<Site*>::iterator trav;
     vector<Site*> store;
@@ -882,7 +885,7 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
                 store.push_back(*trav);
                 if ((*trav)->i() == site->i() && (*trav)->j() == site->j())
                 {
-                    //store.push_back(it->first);
+                    store.push_back(it->first);
                     cycle.insert({it->first, store});
                 }
 
@@ -896,6 +899,36 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
         it++;
     }
 
+
+
+	// If the first item in the connected componenent above was inserted, but it didn't have
+	// at least 2 adjacent verties, then erase that vertex from the list as it's not a cycle.
+    it = cycle.begin();
+    while (it != cycle.end())
+    {
+	vectIt = it->second.end();
+	vectIt--;
+	adjList = findAdjLists(it->second);
+	adjIt = adjList.begin();
+	      // Find that corridor site's adjacency list.
+        adjIt = adjList.begin();
+
+        while (adjIt != adjList.end() && (adjIt->first->i() != (*vectIt)->i() || adjIt->first->j() != (*vectIt)->j()))
+            adjIt++;
+
+        if (adjIt->second.size() <= 1)
+        {
+            erase = vectIt;
+            ++vectIt;
+            it->second.erase(erase);
+        }
+        else
+            vectIt++;
+
+	it++;
+
+	
+    }
 
     it = cycle.begin();
     while (it != cycle.end())
