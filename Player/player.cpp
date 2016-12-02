@@ -856,15 +856,22 @@ void Player::freeMarkedArray(bool **&marked)
 
 map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn)
 {
+    int i;
+    int j;
     map<Site*, vector<Site*>> cycle;
     map<Site*, vector<Site*>> adjList;
     map<Site*, vector<Site*>>::iterator adjIt;
     map<Site*, vector<Site*>>::iterator it;
     vector<Site*>::iterator erase;
     vector<Site*>::iterator vectIt;
+    vector<Site*>::iterator prev;
     vector<Site*>::iterator trav;
     vector<Site*> store;
-    Site* site;
+    vector<Site*> corridors;
+    Site* site = nullptr;
+    Site* room = nullptr;
+    bool lessThanTwoCorridors;
+	int counter;
 
     // For each connected component, look at all of the vertices in that component.
     it = adjConn.begin();
@@ -903,6 +910,7 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 
 	// If the first item in the connected componenent above was inserted, but it didn't have
 	// at least 2 adjacent verties, then erase that vertex from the list as it's not a cycle.
+	/*
     it = cycle.begin();
     while (it != cycle.end())
     {
@@ -930,6 +938,17 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 	
     }
 
+		*/
+
+	do
+	{
+		lessThanTwoCorridors = removeCorridorsWithOneAdjacentCorridor(cycle);
+
+	} while (lessThanTwoCorridors);
+	
+
+	
+
     it = cycle.begin();
     while (it != cycle.end())
     {
@@ -946,6 +965,118 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
     }
 
     return cycle;
+
+}
+
+
+bool Player::removeCorridorsWithOneAdjacentCorridor(map<Site*, vector<Site*>> &cycle)
+{
+	map<Site*, vector<Site*>>::iterator it;
+	map<Site*, vector<Site*>> adjList;
+	map<Site*, vector<Site*>>::iterator adjIt;
+	vector<Site*>::iterator vectIt;
+	vector<Site*>::iterator erase;
+	bool lessThanTwoCorridors;
+	bool moreToDelete = false;
+	int counter;
+
+	it = cycle.begin();
+	while (it != cycle.end())
+	{
+		adjList = findAdjLists(it->second);
+		adjIt = adjList.begin();
+		while (adjIt != adjList.end())
+		{
+			if (adjIt->second.size() < 2)
+			{
+				lessThanTwoCorridors = true;
+				while (lessThanTwoCorridors)
+				{
+					counter = 0;
+					vectIt = it->second.begin();	
+					while (vectIt != it->second.end())
+					{
+						if ((*vectIt)->i() == adjIt->first->i() && (*vectIt)->j() == adjIt->first->j())
+						{
+							cout << "Deleted " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+							erase = vectIt;
+							++vectIt;
+							it->second.erase(erase);
+							counter++;
+							moreToDelete = true;
+						}
+						else
+							vectIt++;
+					}
+
+					if (counter == 0)
+						lessThanTwoCorridors = false;
+
+				}
+				
+			}
+			adjIt++;
+		}
+		it++;
+	}
+
+
+	return moreToDelete;
+
+
+}
+
+void Player::setCoordinates(int &i, int &j)
+{
+	if (playfield->isRoom(i, j))
+	{
+		while (playfield->isRoom(i, j))
+			j++;
+
+		j--;
+
+		while (playfield->isRoom(i, j))
+			i++;
+
+		i--;
+	}
+
+}
+
+Site* Player::getAdjacentRoomSite(Site* site)
+{
+	int i;
+	int j;
+	Site* room = nullptr;
+
+	i = site->i();
+	j = site->j();
+
+	if (playfield->isRoom(i + 1, j))
+	{
+		room = new Site(i + 1, j);
+		return room;
+	}
+
+	if (playfield->isRoom(i - 1, j))
+	{
+		room = new Site(i - 1, j);
+		return room;
+	}
+
+	if (playfield->isRoom(i, j + 1))
+	{
+		room = new Site(i, j + 1);
+		return room;
+	}
+
+	if (playfield->isRoom(i, j - 1))
+	{
+		room = new Site(i, j - 1);
+		return room;
+	}
+
+	return nullptr;
 
 }
 

@@ -93,6 +93,12 @@ class Player
 	vector<Site*> getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player);
 
 	Site* chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, int **&distPlayer,  int **&distMonster, const Site* player);
+
+	Site* getAdjacentRoomSite(Site* site);
+
+	void setCoordinates(int &i, int &j);
+
+	bool removeCorridorsWithOneAdjacentCorridor(map<Site*, vector<Site*>> &cycle);
 	
 
 };
