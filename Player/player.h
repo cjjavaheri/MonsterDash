@@ -96,13 +96,17 @@ class Player
 
 	void setCoordinates(int &i, int &j);
 
-	vector<Site*> removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvector);
+	vector<Site*> removeSitesWithOneAdjacentSite(vector<Site*> myvector);
 
 	Site* scanAdjacentCorridorSites(const Site* player, int **&distMonster);
 
 	Site* stayAliveAsLongAsPossible(int **&distMonster, int **&distPlayer);
 
 	Site* calculateFinalDestination(Site* nextMove, int**&distPlayer, Site* **&prevPlayer, const Site* player);
+
+	vector<Site*> removeDiagonalRooms(vector<Site*> roomCycle);
+
+	vector<Site*> getRoomCycle();
 	
 
 };

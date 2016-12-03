@@ -174,6 +174,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     static map<Site*, vector<Site*>> cycleBetweenRooms;
     vector<Site*>::iterator adjDiscVectIt;
     vector<Site*> adjVect;
+    static vector<Site*> roomCycle;
     vector<Site*>::iterator vectIt;
     Site* nextMove = nullptr;
     static vector<Site*> cycle;
@@ -200,8 +201,23 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 		return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
             }
 
-		nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
-		return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
+	    else
+	    {
+		if (roomCycle.empty())
+			roomCycle = getRoomCycle();
+
+		vectIt = roomCycle.begin();
+		while (vectIt != roomCycle.end())
+		{
+			cout << "roomCycle " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+			vectIt++;
+		}
+
+		return nullptr;
+
+	    }
+
+		
         }
     }
 
@@ -253,6 +269,104 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
 	return nextMove;
 
+
+}
+
+vector<Site*> Player::getRoomCycle()
+{
+	vector<Site*> roomCycle;
+	vector<Site*>::iterator vectIt;
+	vector<Site*>::iterator erase;
+	Site* site;
+	int i;
+	int j;
+
+	for (i = 0; i < N; i++)
+		for (j = 0; j < N; j++)
+			if (playfield->isRoom(i, j))
+			{
+				site = new Site(i, j);
+				roomCycle.push_back(site);
+			}
+
+	
+	roomCycle = removeDiagonalRooms(roomCycle);
+
+
+
+	roomCycle = removeSitesWithOneAdjacentSite(roomCycle);
+	return roomCycle;
+
+}
+
+vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
+{
+	vector<Site*>::iterator vectIt;
+	vector<Site*>::iterator trav;
+	vector<Site*>::iterator erase;
+	vector<Site*> remove;
+	Site* site;
+	int i;
+	int j;
+	bool adjWall;
+
+	vectIt = roomCycle.begin();
+	while (vectIt != roomCycle.end())
+	{
+		adjWall = false;
+
+		i = (*vectIt)->i();
+		j = (*vectIt)->j();
+
+		if (playfield->isWall(i - 1, j - 1) || playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j + 1) || playfield->isWall(i, j - 1) || playfield->isWall(i, j) || playfield->isWall(i, j + 1) || playfield->isWall(i + 1, j - 1) || playfield->isWall(i + 1, j) || playfield->isWall(i + 1, j + 1))
+			adjWall = true;
+
+		if (!adjWall)
+		{
+			i = (*vectIt)->i();
+			j = (*vectIt)->j();
+
+			if (playfield->isRoom(i + 1, j + 1) || playfield->isRoom(i + 1, j - 1) || playfield->isRoom(i - 1, j - 1) || playfield->isRoom(i - 1, j + 1))
+			{
+				site = new Site(i, j);
+				remove.push_back(site);
+			}
+			
+			
+				
+		}
+
+		vectIt++;
+	}
+
+	vectIt = remove.begin();
+	while ( vectIt != remove.end())
+	{
+		trav = roomCycle.begin();
+		while (trav != roomCycle.end())
+		{
+			if ((*trav)->i() == (*vectIt)->i() && (*trav)->j() == (*vectIt)->j())
+			{
+				erase = trav;
+				++trav;
+				roomCycle.erase(erase);
+			}
+		
+			else
+				trav++;
+		}
+
+		vectIt++;
+	}
+
+				vectIt = roomCycle.begin();
+		while (vectIt != roomCycle.end())
+		{
+			cout << "in room func " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+			vectIt++;
+		}
+
+	return roomCycle;
 
 }
 
@@ -985,7 +1099,7 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 	it = adjConn.begin();
 	while (it != adjConn.end())
 	{
-		it->second = removeCorridorsWithOneAdjacentCorridor(it->second);
+		it->second = removeSitesWithOneAdjacentSite(it->second);
 		it++;
 	}
 
@@ -1022,7 +1136,7 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 }
 
 
-vector<Site*> Player::removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvector)
+vector<Site*> Player::removeSitesWithOneAdjacentSite(vector<Site*> myvector)
 {
 	map<Site*, vector<Site*>>::iterator it;
 	map<Site*, vector<Site*>> adjList;
@@ -1031,6 +1145,7 @@ vector<Site*> Player::removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvec
 	vector<Site*>::iterator erase;
 	bool moreToDelete = false;
 	int counter;
+	bool enteredIf;
 
 	do
 	{
@@ -1040,7 +1155,7 @@ vector<Site*> Player::removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvec
 		while (adjIt != adjList.end())
 		{
 			counter = 0;
-
+			enteredIf = false;
 			// Delete any vertices that have less than 2 adjacent
 			// corridor sites.
 			if (adjIt->second.size() < 2)
@@ -1062,6 +1177,8 @@ vector<Site*> Player::removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvec
 				adjList = findAdjLists(myvector);
 				adjIt = adjList.begin();
 
+				enteredIf = true;
+
 				if (myvector.size() == 0)
 					return myvector;
 				
@@ -1070,10 +1187,18 @@ vector<Site*> Player::removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvec
 			if (counter == 0)
 				moreToDelete = false;
 
-			adjIt++;
+			if (!enteredIf)
+				adjIt++;
 
 		}
 	} while (moreToDelete);
+
+	vectIt = myvector.begin();
+	while (vectIt != myvector.end())
+	{
+		cout << "myvector " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+		vectIt++;
+	}
 
 	return myvector;
 
