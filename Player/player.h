@@ -50,8 +50,6 @@ class Player
 
 	bool doWallsExist();
 
-	Site* keepDistance(int **&distMonster, const Site* player, vector<Site*> &allocatedMemory);
-
 	int countDisconnectedComponents(map<Site*, vector<Site*>> &adj);
 
 
@@ -103,6 +101,8 @@ class Player
 	Site* scanAdjacentCorridorSites(const Site* player, int **&distMonster);
 
 	Site* stayAliveAsLongAsPossible(int **&distMonster, int **&distPlayer);
+
+	Site* calculateFinalDestination(Site* nextMove, int**&distPlayer, Site* **&prevPlayer, const Site* player);
 	
 
 };

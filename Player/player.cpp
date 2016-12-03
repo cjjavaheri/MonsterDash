@@ -196,8 +196,8 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
             hasWalls = doWallsExist();
             if (!hasWalls)
             {
-                nextMove = keepDistance(distMonster, player, allocatedMemory);
-                return nextMove;
+               	nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
+		return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
             }
         }
     }
@@ -250,6 +250,44 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
 	return nextMove;
 
+
+}
+
+Site* Player::calculateFinalDestination(Site* nextMove, int**&distPlayer, Site* **&prevPlayer, const Site* player)
+{
+	unsigned int i;
+	unsigned int j;
+
+	    // Calculate a path to the final destination.
+    i = nextMove->i();
+    j = nextMove->j();
+
+    if (i == player->i() && j == player->j())
+        return nextMove;
+
+
+    // Starting distance is not 1
+    if (distPlayer[i][j] != 1)
+    {
+
+        while (distPlayer[i][j] != 1)
+        {
+            nextMove = prevPlayer[i][j];
+            i = nextMove->i();
+            j = nextMove->j();
+        }
+
+        return nextMove;
+
+    }
+
+    // Starting distance is 1 ; therefore, the player only has to take
+    // one more move to reach the final destination.
+    else
+    {
+
+        return nextMove;
+    }
 
 }
 
@@ -1811,32 +1849,6 @@ int Player::countDisconnectedComponents(map<Site*, vector<Site*>> &adj)
 
 }
 
-Site* Player::keepDistance(int **&distMonster, const Site* player, vector<Site*> &allocatedMemory)
-{
-    unsigned int i;
-    unsigned int j;
-    int longestDist = distMonster[player->i()][player->j()];
-    Site* nextMove = new Site(player->i(), player->j());
-    allocatedMemory.push_back(nextMove);
-
-    // Calculate longest path for monster. Assumes continuity between room sites.
-    for (i = player->i() - 1; i < player->i() + 2; i++)
-        for (j = player->j() - 1; j < player->j() + 2; j++)
-            if (playfield->isRoom(i, j))
-            {
-                if (distMonster[i][j] > longestDist)
-                {
-                    longestDist = distMonster[i][j];
-                    nextMove = new Site(i, j);
-                    allocatedMemory.push_back(nextMove);
-
-                }
-            }
-
-    return nextMove;
-
-
-}
 
 bool Player::doWallsExist()
 {
