@@ -203,14 +203,14 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     }
 
     disc = countDisconnectedComponents(adj);
-    cout << "Dist: " << disc << endl;
+    cout << "Disc: " << disc << endl;
 
     if (disc != 0)
     {
         removeDeadEnds(adj);
 
         disc = countDisconnectedComponents(adj);
-        cout << "Dist: " << disc << endl;
+        cout << "Disc: " << disc << endl;
 
         if (disc != 0)
         {

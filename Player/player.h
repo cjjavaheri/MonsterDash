@@ -99,6 +99,8 @@ class Player
 	void setCoordinates(int &i, int &j);
 
 	vector<Site*> removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvector);
+
+	Site* scanAdacentCorridorSites(const Site* player, int **&distMonster);
 	
 
 };
