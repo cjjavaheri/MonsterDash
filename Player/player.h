@@ -98,7 +98,7 @@ class Player
 
 	void setCoordinates(int &i, int &j);
 
-	bool removeCorridorsWithOneAdjacentCorridor(map<Site*, vector<Site*>> &cycle);
+	vector<Site*> removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvector);
 	
 
 };

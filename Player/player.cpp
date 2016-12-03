@@ -856,8 +856,6 @@ void Player::freeMarkedArray(bool **&marked)
 
 map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn)
 {
-    int i;
-    int j;
     map<Site*, vector<Site*>> cycle;
     map<Site*, vector<Site*>> adjList;
     map<Site*, vector<Site*>>::iterator adjIt;
@@ -868,11 +866,8 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
     vector<Site*>::iterator trav;
     vector<Site*> store;
     vector<Site*> corridors;
-    Site* site = nullptr;
-    Site* room = nullptr;
-    bool lessThanTwoCorridors;
-	int counter;
 
+	/*
     // For each connected component, look at all of the vertices in that component.
     it = adjConn.begin();
     while (it != adjConn.end())
@@ -905,12 +900,13 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 
         it++;
     }
+	*/
 
-
+	/*
 
 	// If the first item in the connected componenent above was inserted, but it didn't have
 	// at least 2 adjacent verties, then erase that vertex from the list as it's not a cycle.
-	/*
+	
     it = cycle.begin();
     while (it != cycle.end())
     {
@@ -938,16 +934,48 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 	
     }
 
-		*/
+		
+	*/
 
-	do
+	/*
+	it = cycle.begin();
+	adjList = findAdjLists(it->second);
+	adjIt = adjList.begin();
+	while (adjIt != adjList.end())
 	{
-		lessThanTwoCorridors = removeCorridorsWithOneAdjacentCorridor(cycle);
+		cout << adjIt->first->i() << " " << adjIt->first->j() << " " << adjIt->second.size() << endl;
+		adjIt++;
+	}
 
-	} while (lessThanTwoCorridors);
-	
+	*/
 
 	
+	/*
+	it = cycle.begin();
+	it->second = removeCorridorsWithOneAdjacentCorridor(it->second);
+	vectIt = it->second.begin();
+	cycle.insert({*vectIt, it->second});
+	cycle.erase(it);
+
+	*/
+
+	it = adjConn.begin();
+	while (it != adjConn.end())
+	{
+		it->second.push_back(it->first);
+		it++;
+	}
+
+
+
+	it = adjConn.begin();
+	while (it != adjConn.end())
+	{
+		it->second = removeCorridorsWithOneAdjacentCorridor(it->second);
+		it++;
+	}
+
+	cycle = adjConn;
 
     it = cycle.begin();
     while (it != cycle.end())
@@ -969,60 +997,55 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 }
 
 
-bool Player::removeCorridorsWithOneAdjacentCorridor(map<Site*, vector<Site*>> &cycle)
+vector<Site*> Player::removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvector)
 {
 	map<Site*, vector<Site*>>::iterator it;
 	map<Site*, vector<Site*>> adjList;
 	map<Site*, vector<Site*>>::iterator adjIt;
 	vector<Site*>::iterator vectIt;
 	vector<Site*>::iterator erase;
-	bool lessThanTwoCorridors;
 	bool moreToDelete = false;
 	int counter;
 
-	it = cycle.begin();
-	while (it != cycle.end())
+	do
 	{
-		adjList = findAdjLists(it->second);
+		adjList = findAdjLists(myvector);
 		adjIt = adjList.begin();
 		while (adjIt != adjList.end())
 		{
+			counter = 0;
+
 			if (adjIt->second.size() < 2)
 			{
-				lessThanTwoCorridors = true;
-				while (lessThanTwoCorridors)
+				vectIt = myvector.begin();
+				while (vectIt != myvector.end() && ((*vectIt)->i() != adjIt->first->i() || (*vectIt)->j() != adjIt->first->j()))
 				{
-					counter = 0;
-					vectIt = it->second.begin();	
-					while (vectIt != it->second.end())
-					{
-						if ((*vectIt)->i() == adjIt->first->i() && (*vectIt)->j() == adjIt->first->j())
-						{
-							cout << "Deleted " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
-							erase = vectIt;
-							++vectIt;
-							it->second.erase(erase);
-							counter++;
-							moreToDelete = true;
-						}
-						else
-							vectIt++;
-					}
-
-					if (counter == 0)
-						lessThanTwoCorridors = false;
-
+					vectIt++;
 				}
+
+				cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+				erase = vectIt;
+				++vectIt;
+				myvector.erase(erase);
+				counter++;
+				moreToDelete = true;
+				adjList = findAdjLists(myvector);
+				adjIt = adjList.begin();
+
+				if (myvector.size() == 0)
+					return myvector;
 				
 			}
+				
+			if (counter == 0)
+				moreToDelete = false;
+
 			adjIt++;
+
 		}
-		it++;
-	}
+	} while (moreToDelete);
 
-
-	return moreToDelete;
-
+	return myvector;
 
 }
 
