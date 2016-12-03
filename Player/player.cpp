@@ -199,6 +199,9 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
                	nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
 		return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
             }
+
+		nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
+		return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
         }
     }
 
@@ -434,36 +437,7 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
     }
 
 
-    // Calculate a path to the final destination.
-    i = nextMove->i();
-    j = nextMove->j();
-
-    if (i == player->i() && j == player->j())
-        return nextMove;
-
-
-    // Starting distance is not 1
-    if (distPlayer[i][j] != 1)
-    {
-
-        while (distPlayer[i][j] != 1)
-        {
-            nextMove = prevPlayer[i][j];
-            i = nextMove->i();
-            j = nextMove->j();
-        }
-
-        return nextMove;
-
-    }
-
-    // Starting distance is 1 ; therefore, the player only has to take
-    // one more move to reach the final destination.
-    else
-    {
-
-        return nextMove;
-    }
+	return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
 }
 
 Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, int **&distPlayer,  int **&distMonster, const Site* player)
@@ -1178,8 +1152,6 @@ void Player::getMarkedArray(bool **&marked)
 
 Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
 {
-    unsigned int i;
-    unsigned int j;
     int shortestDist;
     int longestDist;
     map<Site*, vector<Site*>>::iterator it;
@@ -1263,37 +1235,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 
     }
 
-    // Calculate the path to that corridor site.
-    i = nearestCorr->i();
-    j = nearestCorr->j();
-
-    if (i == player->i() && j == player->j())
-        return nearestCorr;
-
-
-
-    // Starting distance is not 1
-    if (distPlayer[i][j] != 1)
-    {
-
-        while (distPlayer[i][j] != 1)
-        {
-            nearestCorr = prevPlayer[i][j];
-            i = nearestCorr->i();
-            j = nearestCorr->j();
-        }
-        return nearestCorr;
-
-    }
-
-    // Starting distance is 1 ; therefore, the player only has to take one move
-    // to reach its destination.
-    else
-    {
-
-        return nearestCorr;
-    }
-
+	return calculateFinalDestination(nearestCorr, distPlayer, prevPlayer, player);
 }
 
 void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int **&distMonster, vector<Site*> &cycle, map<Site*, vector<Site*>> &adjDisc)
@@ -2110,36 +2052,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
         }
     }
 
-    // Calculate a path to the final destination.
-    i = nextMove->i();
-    j = nextMove->j();
-
-    if (i == player->i() && j == player->j())
-        return nextMove;
-
-
-    // Starting distance is not 1
-    if (distPlayer[i][j] != 1)
-    {
-
-        while (distPlayer[i][j] != 1)
-        {
-            nextMove = prevPlayer[i][j];
-            i = nextMove->i();
-            j = nextMove->j();
-        }
-
-        return nextMove;
-
-    }
-
-    // Starting distance is 1 ; therefore, the player only has to take
-    // one more move to reach the final destination.
-    else
-    {
-
-        return nextMove;
-    }
+    return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
 
 }
 
