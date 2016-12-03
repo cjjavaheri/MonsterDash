@@ -404,9 +404,7 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
     Site* nextMove = nullptr;
     unsigned int i = player->i();
     unsigned int j = player->j();
-    int longestDist;
 
-        longestDist = distMonster[i][j];
         nextMove = new Site(i, j);
 
 		// Find the adjacency list of the corridor site the player
@@ -504,11 +502,13 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
 		// then as a last resort the player can scan all adjacent corridor sites to the 		//player and choose the one which is the farthest away from the monster.
             if (distMonster[nextMove->i()][nextMove->j()] < distPlayer[nextMove->i()][nextMove->j()])
             {
-            	return scanAdjacentCorridorSites(player, distMonster);
+            	nextMove = scanAdjacentCorridorSites(player, distMonster);
 	    }
+
+		return nextMove;
 }
 
-Site* Player::scanAdacentCorridorSites(const Site* player, int **&distMonster)
+Site* Player::scanAdjacentCorridorSites(const Site* player, int **&distMonster)
 {
 	Site* nextMove = nullptr;
 	int longestDist;
@@ -562,7 +562,7 @@ Site* Player::scanAdacentCorridorSites(const Site* player, int **&distMonster)
 
                 cout << nextMove->i() << " " << nextMove->j() << endl;
 
-            }
+            
 
 		return nextMove;
 }

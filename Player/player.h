@@ -100,7 +100,7 @@ class Player
 
 	vector<Site*> removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvector);
 
-	Site* scanAdacentCorridorSites(const Site* player, int **&distMonster);
+	Site* scanAdjacentCorridorSites(const Site* player, int **&distMonster);
 	
 
 };
