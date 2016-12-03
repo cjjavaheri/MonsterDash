@@ -85,7 +85,7 @@ class Player
 
 	bool hasAdjacentRoom(Site* site);
 
-	Site* findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster);
+	Site* findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms, map<Site*, vector<Site*>> adj, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster);
 
 
 	void searchAllAdjCorrSites(vector<Site*> &vectDisc, Site* site, int &i, int &j);
@@ -101,6 +101,8 @@ class Player
 	vector<Site*> removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvector);
 
 	Site* scanAdjacentCorridorSites(const Site* player, int **&distMonster);
+
+	Site* stayAliveAsLongAsPossible(int **&distMonster, int **&distPlayer);
 	
 
 };

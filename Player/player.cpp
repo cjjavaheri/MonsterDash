@@ -232,7 +232,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
     cout << "connected cycle is empty" << endl;
     adjConn = checkForConnectedDeadEnds(adjConn);
-    return findCyclesBetweenRooms(adjConn, distMonster, distPlayer, prevPlayer, player, monster);
+    nextMove = findCyclesBetweenRooms(adjConn, adj, distMonster, distPlayer, prevPlayer, player, monster);
 
     it = adjConn.begin();
     while (it != adjConn.end())
@@ -248,10 +248,41 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
         it++;
     }
 
+	return nextMove;
+
 
 }
 
-Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
+Site* Player::stayAliveAsLongAsPossible(int **&distMonster, int **&distPlayer)
+{
+	Site* nextMove = nullptr;
+	Site* site;
+	map<int, Site*> decisions;
+	map<int, Site*>::iterator it;
+	int i;
+	int j;
+
+	for (i = 0; i < N; i++)
+		for (j = 0; j < N; j++)
+		{
+			if (playfield->isRoom(i, j) || playfield->isCorridor(i, j))
+			{
+				if (distPlayer[i][j] < distMonster[i][j])
+				{
+					site = new Site(i, j);
+					decisions.insert({distMonster[i][j], site});
+				}
+			}
+		}
+
+	it = decisions.end();
+	it--;
+	nextMove = it->second;
+	return nextMove;
+
+}
+
+Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms, map<Site*, vector<Site*>> adj, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
 {
     vector<Site*> corridors;
     vector<Site*>::iterator vectIt;
@@ -292,10 +323,17 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 		// Choose an adjacent corridor site that the player can reach before
 		// it is caught by the monster.
             if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < distMonster[(*vectIt)->i()][(*vectIt)->j()])
-                nextMove = *vectIt;
+            	nextMove = *vectIt;
+	
 
             vectIt++;
         }
+
+	if (nextMove == nullptr)
+	{
+		nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);	
+	}
+	
     }
 
     else
@@ -407,6 +445,7 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
 
         nextMove = new Site(i, j);
 
+
 		// Find the adjacency list of the corridor site the player
 		// is currently standing on. This also gives the connected
 		// component the player is standing on.
@@ -493,9 +532,17 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
 		// and choose the one which is the largest distance away from the monster instead.
             if (nextMove->i() == player->i() && nextMove->j() == player->j())
             {
-                decIt = decisions.end();
-                decIt--;
-                nextMove = decIt->second;
+		if (!decisions.empty())
+		{
+                	decIt = decisions.end();
+                	decIt--;
+                	nextMove = decIt->second;
+		}
+	
+		else
+		{
+			nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
+		}
             }
 
 		// If the monster can actually reach this particular site before the player can
