@@ -860,105 +860,16 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
     map<Site*, vector<Site*>> adjList;
     map<Site*, vector<Site*>>::iterator adjIt;
     map<Site*, vector<Site*>>::iterator it;
-    vector<Site*>::iterator erase;
     vector<Site*>::iterator vectIt;
     vector<Site*>::iterator prev;
     vector<Site*>::iterator trav;
     vector<Site*> store;
     vector<Site*> corridors;
 
-	/*
-    // For each connected component, look at all of the vertices in that component.
-    it = adjConn.begin();
-    while (it != adjConn.end())
-    {
-        vectIt = it->second.begin();
-        // For each vertex in a particular component, determine if a particular vertex
-        // is found twice.
-        while (vectIt != it->second.end())
-        {
-            site = *vectIt;
-            trav = vectIt;
-            store.push_back(*trav);
-            trav++;
-            // If a particular vertex is found twice, then it is a cycle.
-            while (trav != it->second.end())
-            {
-                store.push_back(*trav);
-                if ((*trav)->i() == site->i() && (*trav)->j() == site->j())
-                {
-                    store.push_back(it->first);
-                    cycle.insert({it->first, store});
-                }
 
-                trav++;
-            }
-
-            store.clear();
-            vectIt++;
-        }
-
-        it++;
-    }
-	*/
-
-	/*
-
-	// If the first item in the connected componenent above was inserted, but it didn't have
-	// at least 2 adjacent verties, then erase that vertex from the list as it's not a cycle.
-	
-    it = cycle.begin();
-    while (it != cycle.end())
-    {
-	vectIt = it->second.end();
-	vectIt--;
-	adjList = findAdjLists(it->second);
-	adjIt = adjList.begin();
-	      // Find that corridor site's adjacency list.
-        adjIt = adjList.begin();
-
-        while (adjIt != adjList.end() && (adjIt->first->i() != (*vectIt)->i() || adjIt->first->j() != (*vectIt)->j()))
-            adjIt++;
-
-        if (adjIt->second.size() <= 1)
-        {
-            erase = vectIt;
-            ++vectIt;
-            it->second.erase(erase);
-        }
-        else
-            vectIt++;
-
-	it++;
-
-	
-    }
-
-		
-	*/
-
-	/*
-	it = cycle.begin();
-	adjList = findAdjLists(it->second);
-	adjIt = adjList.begin();
-	while (adjIt != adjList.end())
-	{
-		cout << adjIt->first->i() << " " << adjIt->first->j() << " " << adjIt->second.size() << endl;
-		adjIt++;
-	}
-
-	*/
-
-	
-	/*
-	it = cycle.begin();
-	it->second = removeCorridorsWithOneAdjacentCorridor(it->second);
-	vectIt = it->second.begin();
-	cycle.insert({*vectIt, it->second});
-	cycle.erase(it);
-
-	*/
-
+	// Starting at each connected component, since each representative element
+	// of that connected component is NOT already in the component list, simply
+	// insert it into the list.
 	it = adjConn.begin();
 	while (it != adjConn.end())
 	{
@@ -967,7 +878,9 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 	}
 
 
-
+	// Remove any and all vertices that are not a part of the cycle. I.e. remove
+	// any verties that only have 1 or 0 adjacent corridor sites in the connected
+	// component.
 	it = adjConn.begin();
 	while (it != adjConn.end())
 	{
@@ -1009,12 +922,15 @@ vector<Site*> Player::removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvec
 
 	do
 	{
+		// Get adjacency list
 		adjList = findAdjLists(myvector);
 		adjIt = adjList.begin();
 		while (adjIt != adjList.end())
 		{
 			counter = 0;
 
+			// Delete any vertices that have less than 2 adjacent
+			// corridor sites.
 			if (adjIt->second.size() < 2)
 			{
 				vectIt = myvector.begin();
@@ -1029,6 +945,8 @@ vector<Site*> Player::removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvec
 				myvector.erase(erase);
 				counter++;
 				moreToDelete = true;
+				// adj list has changed because of deletion, so call it
+				// again.
 				adjList = findAdjLists(myvector);
 				adjIt = adjList.begin();
 
@@ -1036,7 +954,7 @@ vector<Site*> Player::removeCorridorsWithOneAdjacentCorridor(vector<Site*> myvec
 					return myvector;
 				
 			}
-				
+			// If no nodes are found, then no more to delete.
 			if (counter == 0)
 				moreToDelete = false;
 
