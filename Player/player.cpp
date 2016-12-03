@@ -409,11 +409,15 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
         longestDist = distMonster[i][j];
         nextMove = new Site(i, j);
 
-	
+		// Find the adjacency list of the corridor site the player
+		// is currently standing on. This also gives the connected
+		// component the player is standing on.
             it = cycleBetweenRooms.begin();
             while (it != cycleBetweenRooms.end())
             {
                 //cout << it->first->i() << "---------- " << it->first->j() << endl;
+		//Make sure the representative of the cycle is included in the list of
+		// vertices.
                 it->second.push_back(it->first);
                 if (i == it->first->i() && j == it->first->j())
                     adjList = findAdjLists(it->second);
@@ -431,6 +435,9 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
                 it++;
             }
 
+		// For each vertex in the adjacency list, determine if it has a room next to it
+		// (a way out for the player). Make a list of these as decisions storing distance
+		// from the monster to the site as well.
             it = adjList.begin();
             while (it != adjList.end())
             {
@@ -443,6 +450,9 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
                 it++;
             }
 
+		// Monster or player is on a corridor. Delete these corridors that the monster or
+		// player has just passed through so that the A.I. doesn't make the mistake
+		// of turning around and heading backwards when the monster is right behind it.
             if (!move.empty())
             {
                 vectIt = move.begin();
@@ -468,6 +478,8 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
 
             }
 
+	   // Look at all possible decisions and choose one that the player can reach
+	   // before the monster can reach the same site.
             decIt = decisions.begin();
             while (decIt != decisions.end())
             {
@@ -478,7 +490,9 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
             }
 
 
-
+		// If after all of this work has been done, the decision chosen might have
+		// been the player's same location! So go back through the list of decisions,
+		// and choose the one which is the largest distance away from the monster instead.
             if (nextMove->i() == player->i() && nextMove->j() == player->j())
             {
                 decIt = decisions.end();
@@ -486,9 +500,23 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
                 nextMove = decIt->second;
             }
 
+		// If the monster can actually reach this particular site before the player can
+		// then as a last resort the player can scan all adjacent corridor sites to the 		//player and choose the one which is the farthest away from the monster.
             if (distMonster[nextMove->i()][nextMove->j()] < distPlayer[nextMove->i()][nextMove->j()])
             {
-                i = player->i();
+            	return scanAdjacentCorridorSites(player, distMonster);
+	    }
+}
+
+Site* Player::scanAdacentCorridorSites(const Site* player, int **&distMonster)
+{
+	Site* nextMove = nullptr;
+	int longestDist;
+	int i;
+	int j;
+
+
+	        i = player->i();
                 j = player->j();
 
                 cout << "i: " << i << endl;
@@ -537,7 +565,6 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
             }
 
 		return nextMove;
-
 }
 
 vector<Site*> Player::getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player )
