@@ -284,10 +284,13 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
     if (playfield->isRoom(player))
     {
+	// Get all corridor sites adjacent to the room of the player.
         corridors = getCycleChoices(cycleBetweenRooms, player);
         vectIt = corridors.begin();
         while (vectIt != corridors.end())
         {
+		// Choose an adjacent corridor site that the player can reach before
+		// it is caught by the monster.
             if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < distMonster[(*vectIt)->i()][(*vectIt)->j()])
                 nextMove = *vectIt;
 
@@ -297,14 +300,18 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
     else
     {
+	// Player must be on a corridor site.
         i = player->i();
         j = player->j();
 
         longestDist = distMonster[i][j];
         nextMove = new Site(i, j);
 
+	// Check if there is an adjacent room to the corridor site the player is standing on.
         if (hasAdjacentRoom(nextMove))
         {
+		// For each of the 4 possible choices, check to make sure it's legal
+		// and it's a larger distance away from the monster.
             if (playfield->isRoom(i + 1, j) || playfield->isCorridor(i + 1, j))
             {
                 if (distMonster[i + 1][j] > longestDist)
@@ -344,7 +351,8 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
         else
         {
-
+		// The player is standing on a corridor site that does not have
+		// an adjacent room next to it.
 		nextMove = chooseNextCorridor(cycleBetweenRooms, distPlayer, distMonster, player);
         }
     }
@@ -568,7 +576,7 @@ vector<Site*> Player::getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRoom
     cout << "Corridors.size() " << corridors.size() << endl;
 
 
-
+	// Delete any corridors that are not in the cycle between rooms and corridors.
     vectIt = corridors.begin();
     while (vectIt != corridors.end())
     {
@@ -576,6 +584,7 @@ vector<Site*> Player::getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRoom
         exist = false;
         while (it != cycleBetweenRooms.end())
         {
+		// If the list of decisions contains a corridor in the cycle set exist to true.
             if (it->first->i() == (*vectIt)->i() && it->first->j() == (*vectIt)->j())
                 exist = true;
             trav = it->second.begin();
@@ -591,6 +600,7 @@ vector<Site*> Player::getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRoom
 
         }
 
+	// Delete the corridor sites which are not a part of the cycle.
         if (!exist)
         {
             vectIt = corridors.erase(vectIt);
@@ -694,6 +704,9 @@ map<Site*,vector<Site*>> Player::checkForConnectedDeadEnds(map<Site*, vector<Sit
     vector<Site*>::iterator vectIt;
     int counter;
 
+	// Check each connected component to make sure they lead back to a room.
+	// If they don't have at least 2 room connections, it must be a dead end.
+	// Therefore, remove it.
     it = adjConn.begin();
     while (it != adjConn.end())
     {
@@ -865,6 +878,8 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
     vector<Site*>::iterator trav;
     vector<Site*> store;
     vector<Site*> corridors;
+    int empty;
+    int connectedComponents;
 
 
 	// Starting at each connected component, since each representative element
@@ -891,11 +906,19 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 	cycle = adjConn;
 
     it = cycle.begin();
+	// Empty and connectedComponents is used to determine the number of
+	// empty connected components. If all of them are empty, clear
+	// the cycle.
+    empty = 0;
+    connectedComponents = 0;
     while (it != cycle.end())
     {
         cout << "Start----------------------------" << endl;
         cout << it->first->i() << " " << it->first->j() << endl;
         vectIt = it->second.begin();
+	connectedComponents++;
+	if (it->second.empty())
+		empty++;
         while (vectIt != it->second.end())
         {
             cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
@@ -904,6 +927,9 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
         cout << "--------------" << it->second.size() << endl;
         it++;
     }
+
+	if (empty == connectedComponents)
+		cycle.clear();
 
     return cycle;
 
