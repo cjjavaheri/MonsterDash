@@ -104,9 +104,16 @@ class Player
 
 	vector<Site*> removeDiagonalRooms(vector<Site*> roomCycle);
 
-	vector<Site*> getRoomCycle();
+	Site* getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player);
 
 	bool checkPerimeterForAdjWalls(Site* site);
+
+	multimap<Site*, vector<Site*>> findAllRoomCycles(map<Site*, vector<Site*>> adjConn);
+
+	Site* chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&prevPlayer, vector<Site*> roomCycle, const Site* player);
+
+	map<Site*, vector<Site*>> findAdjRoomLists(vector<Site*> rooms);
+
 	
 
 };

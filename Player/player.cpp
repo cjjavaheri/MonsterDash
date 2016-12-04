@@ -91,7 +91,7 @@ const Site* Player::move()
     */
 }
 
-map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
+map<Site*, vector<Site*>> Player::findAdjRoomLists(vector<Site*> rooms)
 {
     vector<Site*>::iterator it;
     vector<Site*>::iterator curr;
@@ -100,14 +100,14 @@ map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
     Site* compareSite;
     map<Site*, vector<Site*>> adj;
 
-    curr = corridors.begin();
+    curr = rooms.begin();
     // For each corridor site, check all of the corridor sites to see which ones are adjacent.
-    while (curr != corridors.end())
+    while (curr != rooms.end())
     {
         currSite = (*curr);
-        it = corridors.begin();
+        it = rooms.begin();
         adjacentVertices.clear();
-        while (it != corridors.end())
+        while (it != rooms.end())
         {
             // Check the lower vertical site.
             compareSite = (*it);
@@ -124,6 +124,23 @@ map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
 
             // Check the left horizontal site.
             if (currSite->i() == compareSite->i() && currSite->j() - 1 == 				compareSite->j())
+                adjacentVertices.push_back(compareSite);
+
+
+		// Check the lower right site.
+            if (currSite->i() + 1 == compareSite->i() && currSite->j() + 1 == 				compareSite->j())
+                adjacentVertices.push_back(compareSite);
+
+            // Check the lower left side.
+            if (currSite->i() - 1 == compareSite->i() && currSite->j() - 1 == 				compareSite->j())
+                adjacentVertices.push_back(compareSite);
+
+            // Check the upper left side.
+            if (currSite->i() - 1 == compareSite->i() && currSite->j() - 1 == 				compareSite->j())
+                adjacentVertices.push_back(compareSite);
+
+            // Check the upper right side.
+            if (currSite->i() - 1 == compareSite->i() && currSite->j() + 1 == 				compareSite->j())
                 adjacentVertices.push_back(compareSite);
 
             it++;
@@ -204,21 +221,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
 	    else
 	    {
-		if (roomCycle.empty())
-			roomCycle = getRoomCycle();
-
-		vectIt = roomCycle.begin();
-		mapRoomCycle.insert({*vectIt, roomCycle});
-		while (vectIt != roomCycle.end())
-		{
-			
-			cout << "roomCycle " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
-			vectIt++;
-		}
-
-		
-		return findCorridorCycle(mapRoomCycle, distMonster, distPlayer, prevPlayer, player, monster);
-
+		return getRoomCycle(distMonster, distPlayer, prevPlayer, player);
 	    }
 
 		
@@ -276,14 +279,137 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
 }
 
-vector<Site*> Player::getRoomCycle()
+
+map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
 {
-	vector<Site*> roomCycle;
+    vector<Site*>::iterator it;
+    vector<Site*>::iterator curr;
+    vector<Site*> adjacentVertices;
+    Site* currSite;
+    Site* compareSite;
+    map<Site*, vector<Site*>> adj;
+
+    curr = corridors.begin();
+    // For each corridor site, check all of the corridor sites to see which ones are adjacent.
+    while (curr != corridors.end())
+    {
+        currSite = (*curr);
+        it = corridors.begin();
+        adjacentVertices.clear();
+        while (it != corridors.end())
+        {
+            // Check the lower vertical site.
+            compareSite = (*it);
+            if (currSite->i() + 1 == compareSite->i() && currSite->j() == 				compareSite->j())
+                adjacentVertices.push_back(compareSite);
+
+            // Check the upper vertical site.
+            if (currSite->i() - 1 == compareSite->i() && currSite->j() == 				compareSite->j())
+                adjacentVertices.push_back(compareSite);
+
+            // Check the right horizontal site.
+            if (currSite->i() == compareSite->i() && currSite->j() + 1 == 				compareSite->j())
+                adjacentVertices.push_back(compareSite);
+
+            // Check the left horizontal site.
+            if (currSite->i() == compareSite->i() && currSite->j() - 1 == 				compareSite->j())
+                adjacentVertices.push_back(compareSite);
+
+            it++;
+        }
+
+        adj.insert({currSite, adjacentVertices});
+        curr++;
+    }
+
+    return adj;
+
+}
+
+
+Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&prevPlayer, vector<Site*> roomCycle, const Site* player)
+{
+	vector<Site*>::iterator vectIt;
+	unsigned int i;
+	unsigned int j;
+	map<int, Site*> decisions;
+	map<int, Site*>::iterator decIt;
+	Site* nextMove;
+	map<Site*, vector<Site*>> adjRooms;
+	map<Site*, vector<Site*>>::iterator adjIt;
+
+	vectIt = roomCycle.begin();
+	while (vectIt != roomCycle.end())
+	{
+		i = (*vectIt)->i();
+		j = (*vectIt)->j();
+
+		cout << "[i][j] " << i << " " << j << " p " << distPlayer[i][j] << " m " << distMonster[i][j] << endl;
+		if (distPlayer[i][j] < distMonster[i][j] )
+			{
+
+				decisions.insert({distMonster[i][j], *vectIt});
+			}
+
+		vectIt++;
+
+	}
+
+	decIt = decisions.end();
+	decIt--;
+	nextMove = decIt->second;
+
+	nextMove = calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
+
+	
+
+	if (nextMove->i() == player->i() && nextMove->j() == player->j())
+	{
+		decisions.clear();
+		adjRooms = findAdjRoomLists(roomCycle);
+		adjIt = adjRooms.begin();
+		while (adjIt != adjRooms.end() && (adjIt->first->i() != player->i() || adjIt->first->j() != player->j()))
+			adjIt++;
+
+		vectIt = adjIt->second.begin();
+		while (vectIt != adjIt->second.end())
+		{
+			i = (*vectIt)->i();
+			j = (*vectIt)->j();
+			
+			decisions.insert({distMonster[i][j], *vectIt});
+
+			vectIt++;
+		}
+
+		decIt = decisions.end();
+		decIt--;
+
+		nextMove = decIt->second;
+	}
+
+
+	return nextMove;
+	
+}
+
+Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player)
+{
+	static vector<Site*> roomCycle;
 	vector<Site*>::iterator vectIt;
 	vector<Site*>::iterator erase;
+	map<Site*, vector<Site*>> adjConn;
+	map<Site*, vector<Site*>> adj;
+	map<Site*, vector<Site*>>::iterator it;
+	multimap<Site*, vector<Site*>> allCycles;
+	multimap<Site*, vector<Site*>>::iterator multiIt;
 	Site* site;
 	int i;
 	int j;
+	unsigned int largestVector;
+
+	if (roomCycle.empty())
+	{
 
 	for (i = 0; i < N; i++)
 		for (j = 0; j < N; j++)
@@ -296,12 +422,113 @@ vector<Site*> Player::getRoomCycle()
 	
 	roomCycle = removeDiagonalRooms(roomCycle);
 
+	adj = findAdjLists(roomCycle);
 
+	adjConn = findConnectedComponents(adj);
+
+	 allCycles = findAllRoomCycles(adjConn);
+
+	multiIt = allCycles.begin();
+	largestVector = multiIt->second.size();
+	roomCycle = multiIt->second;
+	while (multiIt != allCycles.end())
+	{
+		if (multiIt->second.size() > largestVector)
+		{
+			roomCycle = multiIt->second;
+			largestVector = multiIt->second.size();
+		}
+
+		multiIt++;
+	}
 
 	roomCycle = removeSitesWithOneAdjacentSite(roomCycle);
-	return roomCycle;
+	vectIt = roomCycle.begin();
+	adjConn.clear();
+	adjConn.insert({*vectIt, roomCycle});
+
+	it = adjConn.begin();
+	while (it != adjConn.end())
+	{
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			cout << "conn " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+			vectIt++;
+		}
+
+		it++;
+	}
+
+	}
+
+	return chooseNextRoom(distMonster, distPlayer, prevPlayer, roomCycle, player);
 
 }
+
+multimap<Site*, vector<Site*>> Player::findAllRoomCycles(map<Site*, vector<Site*>> adjConn)
+{
+    multimap<Site*, vector<Site*>> cycle;
+    multimap<Site*, vector<Site*>>::iterator multiIt;
+    map<Site*, vector<Site*>>::iterator it;
+    vector<Site*>::iterator vectIt;
+    vector<Site*>::iterator trav;
+    vector<Site*> store;
+    Site* site;
+
+    // For each connected component, look at all of the vertices in that component.
+    it = adjConn.begin();
+    while (it != adjConn.end())
+    {
+        vectIt = it->second.begin();
+        // For each vertex in a particular component, determine if a particular vertex
+        // is found twice.
+        while (vectIt != it->second.end())
+        {
+            site = *vectIt;
+            trav = vectIt;
+            store.push_back(*trav);
+            trav++;
+            // If a particular vertex is found twice, then it is a cycle.
+            while (trav != it->second.end())
+            {
+                store.push_back(*trav);
+                if ((*trav)->i() == site->i() && (*trav)->j() == site->j())
+                {
+                    store.push_back(it->first);
+                    cycle.insert({it->first, store});
+                }
+
+                trav++;
+            }
+
+            store.clear();
+            vectIt++;
+        }
+
+        it++;
+    }
+
+
+    multiIt = cycle.begin();
+    while (multiIt != cycle.end())
+    {
+        cout << "Start----------------------------" << endl;
+        cout << multiIt->first->i() << " " << multiIt->first->j() << endl;
+        vectIt = multiIt->second.begin();
+        while (vectIt != multiIt->second.end())
+        {
+            cout << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+            vectIt++;
+        }
+        cout << "--------------" << multiIt->second.size() << endl;
+        multiIt++;
+    }
+
+    return cycle;
+
+}
+
 
 vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
 {
@@ -387,20 +614,27 @@ bool Player::checkPerimeterForAdjWalls(Site* site)
 	int i = site->i();
 	int j = site->j();
 
+	if (i == 0 && j == 0)
+		if (playfield->isWall(i + 1, j + 1) || playfield->isWall(i + 1, j) || playfield->isWall(i, j + 1))
+			return true;
+
+	if (i == 0 && j == N - 1)
+		if (playfield->isWall(i + 1, j - 1) || playfield->isWall(i + 1, j) || playfield->isWall(i, j - 1))
+			return true;
+
+	if (i == N - 1 && j == N - 1)
+		if (playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j - 1) || playfield->isWall(i, j - 1))
+			return true;
+
+	if (i == N - 1 && j == 0)
+		if (playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j - 1) || playfield->isWall(i, j - 1))
+			return true;
+
+
+
+
 	if (i == 0)
 	{
-		if (j == 0)
-		{
-			if (playfield->isWall(i + 1, j + 1) || playfield->isWall(i + 1, j) || playfield->isWall(i, j + 1))
-				return true;
-		}
-
-
-		if (j == N - 1)
-		{
-			if (playfield->isWall(i + 1, j - 1) || playfield->isWall(i + 1, j) || playfield->isWall(i, j - 1))
-				return true;
-		}
 
 		if (playfield->isWall(i + 1, j + 1) || playfield->isWall(i + 1, j) || playfield->isWall(i + 1, j - 1) || playfield->isWall(i, j - 1) || playfield->isWall(i, j + 1))
 				return true;
@@ -410,17 +644,6 @@ bool Player::checkPerimeterForAdjWalls(Site* site)
 
 	if (i == N - 1)
 	{
-		if (j == 0)
-		{
-			if (playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j + 1) || playfield->isWall(i, j + 1))
-				return true;
-		}
-
-		if (j == N - 1)
-		{
-			if (playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j - 1) || playfield->isWall(i, j - 1))
-				return true;
-		}
 
 		if (playfield->isWall(i - 1, j - 1) || playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j + 1) || playfield->isWall(i, j - 1) || playfield->isWall(i, j + 1))
 				return true;
