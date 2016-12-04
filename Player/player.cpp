@@ -329,14 +329,16 @@ map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
 
 Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&prevPlayer, vector<Site*> roomCycle, const Site* player)
 {
+	vector<Site*> possibleMoves;
 	vector<Site*>::iterator vectIt;
 	unsigned int i;
 	unsigned int j;
-	map<int, Site*> decisions;
-	map<int, Site*>::iterator decIt;
-	Site* nextMove;
+	multimap<int, Site*> decisions;
+	multimap<int, Site*>::iterator decIt;
+	Site* nextMove = nullptr;
 	map<Site*, vector<Site*>> adjRooms;
 	map<Site*, vector<Site*>>::iterator adjIt;
+	int farthestDistance;
 
 	vectIt = roomCycle.begin();
 	while (vectIt != roomCycle.end())
@@ -344,7 +346,7 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
 		i = (*vectIt)->i();
 		j = (*vectIt)->j();
 
-		cout << "[i][j] " << i << " " << j << " p " << distPlayer[i][j] << " m " << distMonster[i][j] << endl;
+		//cout << "[i][j] " << i << " " << j << " p " << distPlayer[i][j] << " m " << distMonster[i][j] << endl;
 		if (distPlayer[i][j] < distMonster[i][j] )
 			{
 
@@ -355,14 +357,40 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
 
 	}
 
+
+
 	decIt = decisions.end();
 	decIt--;
-	nextMove = decIt->second;
 
+	farthestDistance = decIt->first;
+	while (decIt != decisions.begin())
+	{
+		if (decIt->first == farthestDistance)
+			possibleMoves.push_back(decIt->second);
+		decIt--;
+	}
+
+	vectIt = possibleMoves.begin();
+	while (vectIt != possibleMoves.end())
+	{
+		if ((*vectIt)->i() != player->i() && (*vectIt)->j() != player->j())
+			nextMove = *vectIt;
+
+		vectIt++;
+	}
+
+	if (nextMove == nullptr)
+	{
+		decIt = decisions.end();
+		decIt--;
+		nextMove = decIt->second;
+	}
+
+	cout << nextMove << endl;
 	nextMove = calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
 
 	
-
+	/*
 	if (nextMove->i() == player->i() && nextMove->j() == player->j())
 	{
 		decisions.clear();
@@ -388,10 +416,11 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
 		nextMove = decIt->second;
 	}
 
-
+	*/
 	return nextMove;
 	
 }
+
 
 Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player)
 {
@@ -465,6 +494,7 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
 	return chooseNextRoom(distMonster, distPlayer, prevPlayer, roomCycle, player);
 
 }
+
 
 multimap<Site*, vector<Site*>> Player::findAllRoomCycles(map<Site*, vector<Site*>> adjConn)
 {
