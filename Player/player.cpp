@@ -888,7 +888,25 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
         if (nextMove == nullptr)
         {
-            nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
+
+		if (corridors.size() > 1)
+		{
+		vectIt = corridors.begin();
+		while (vectIt != corridors.end())
+		{
+			decisions.insert({distPlayer[(*vectIt)->i()][(*vectIt)->j()], *vectIt});
+			vectIt++;
+		}
+
+		decIt = decisions.begin();
+		nextMove = decIt->second;
+		decisions.clear();
+
+		}
+
+		else
+			nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
+
         }
 
     }
