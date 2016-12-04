@@ -414,7 +414,7 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
 	}
 
 	
-	/*
+	
 	if (nextMove->i() == player->i() && nextMove->j() == player->j())
 	{
 		decisions.clear();
@@ -440,7 +440,7 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
 		nextMove = decIt->second;
 	}
 
-	*/
+	
 	return nextMove;
 	
 }
