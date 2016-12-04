@@ -357,8 +357,10 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
 
 	}
 
+	cout << "size: " << decisions.size() << endl;
 
-
+	if (decisions.size() != 0)
+	{
 	decIt = decisions.end();
 	decIt--;
 
@@ -388,6 +390,28 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
 
 	cout << nextMove << endl;
 	nextMove = calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
+
+
+	}
+
+	else
+	{
+		vectIt = roomCycle.begin();
+		while (vectIt != roomCycle.end())
+		{
+			i = (*vectIt)->i();
+			j = (*vectIt)->j();
+
+			decisions.insert({distPlayer[i][j], *vectIt});
+
+			vectIt++;
+		}
+
+		decIt = decisions.begin();
+
+		nextMove = decIt->second;
+		nextMove = calculateFinalDestination(nextMove, distPlayer, prevPlayer, player); 
+	}
 
 	
 	/*
@@ -432,10 +456,10 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
 	map<Site*, vector<Site*>>::iterator it;
 	multimap<Site*, vector<Site*>> allCycles;
 	multimap<Site*, vector<Site*>>::iterator multiIt;
+	multimap<int, vector<Site*>> vectorSizes;
 	Site* site;
 	int i;
 	int j;
-	unsigned int largestVector;
 
 	if (roomCycle.empty())
 	{
@@ -458,20 +482,17 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
 	 allCycles = findAllRoomCycles(adjConn);
 
 	multiIt = allCycles.begin();
-	largestVector = multiIt->second.size();
-	roomCycle = multiIt->second;
 	while (multiIt != allCycles.end())
 	{
-		if (multiIt->second.size() > largestVector)
-		{
-			roomCycle = multiIt->second;
-			largestVector = multiIt->second.size();
-		}
-
+		vectorSizes.insert({multiIt->second.size(), multiIt->second});
 		multiIt++;
 	}
 
+	roomCycle = getCorrectCycle(vectorSizes, distPlayer, distMonster);
+
 	roomCycle = removeSitesWithOneAdjacentSite(roomCycle);
+
+
 	vectIt = roomCycle.begin();
 	adjConn.clear();
 	adjConn.insert({*vectIt, roomCycle});
@@ -492,6 +513,40 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
 	}
 
 	return chooseNextRoom(distMonster, distPlayer, prevPlayer, roomCycle, player);
+
+}
+
+vector<Site*> Player::getCorrectCycle(multimap<int, vector<Site*>> vectorSizes, int **&distPlayer, int **&distMonster)
+{
+	multimap<int, vector<Site*>>::iterator it;
+	vector<Site*>::iterator vectIt;
+	unsigned int i;
+	unsigned int j;
+
+	it = vectorSizes.end();
+	it--;
+
+	while (it != vectorSizes.begin())
+	{
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			i = (*vectIt)->i();
+			j = (*vectIt)->j();
+
+			if (distPlayer[i][j] < distMonster[i][j])
+			{
+				cout << "Entered here " << endl;
+				return it->second;
+			}
+
+			vectIt++;
+		}
+
+		it--;
+	}
+
+	return it->second;
 
 }
 

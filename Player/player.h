@@ -114,6 +114,8 @@ class Player
 
 	map<Site*, vector<Site*>> findAdjRoomLists(vector<Site*> rooms);
 
+	vector<Site*> getCorrectCycle(multimap<int, vector<Site*>> vectorSizes, int **&distPlayer, int **&distMonster);
+
 	
 
 };
