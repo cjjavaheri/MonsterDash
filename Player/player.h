@@ -44,8 +44,6 @@ class Player
 
 
 
-	Site* returnToStart(map<Site*, vector<Site*>> &adj, int **&distPlayer, Site* **&prevPlayer, vector<Site*> &allocatedMemory, Site* &start, const Site* player);
-
 	bool doCorridorsExist();
 
 	bool doWallsExist();
@@ -107,6 +105,8 @@ class Player
 	vector<Site*> removeDiagonalRooms(vector<Site*> roomCycle);
 
 	vector<Site*> getRoomCycle();
+
+	bool checkPerimeterForAdjWalls(Site* site);
 	
 
 };

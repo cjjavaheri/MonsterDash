@@ -166,6 +166,7 @@ vector<Site*> Player::findCorridors(vector<Site*> &corridors)
 
 Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&distMonster, bool **&markedPlayer, Site* **&prevPlayer, int **&distPlayer, const Site* monster, const Site* player, vector<Site*> &allocatedMemory, map<Site*, vector<Site*>> &adj)
 {
+    map<Site*, vector<Site*>> mapRoomCycle;
     map<Site*, vector<Site*>>::iterator it;
     map<Site*, vector<Site*>>::iterator adjDiscIt;
     static map<Site*, vector<Site*>> adjDisc;
@@ -207,13 +208,16 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 			roomCycle = getRoomCycle();
 
 		vectIt = roomCycle.begin();
+		mapRoomCycle.insert({*vectIt, roomCycle});
 		while (vectIt != roomCycle.end())
 		{
+			
 			cout << "roomCycle " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
 			vectIt++;
 		}
 
-		return nullptr;
+		
+		return findCorridorCycle(mapRoomCycle, distMonster, distPlayer, prevPlayer, player, monster);
 
 	    }
 
@@ -318,8 +322,15 @@ vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
 		i = (*vectIt)->i();
 		j = (*vectIt)->j();
 
-		if (playfield->isWall(i - 1, j - 1) || playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j + 1) || playfield->isWall(i, j - 1) || playfield->isWall(i, j) || playfield->isWall(i, j + 1) || playfield->isWall(i + 1, j - 1) || playfield->isWall(i + 1, j) || playfield->isWall(i + 1, j + 1))
+		if (i == 0 || i == N - 1 || j == 0 || j == N - 1)
+			adjWall = checkPerimeterForAdjWalls(*vectIt);
+
+		else
+		{
+			if (playfield->isWall(i - 1, j - 1) || playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j + 1) || playfield->isWall(i, j - 1) || playfield->isWall(i, j) || playfield->isWall(i, j + 1) || playfield->isWall(i + 1, j - 1) || playfield->isWall(i + 1, j) || playfield->isWall(i + 1, j + 1))
 			adjWall = true;
+
+		}
 
 		if (!adjWall)
 		{
@@ -347,6 +358,7 @@ vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
 		{
 			if ((*trav)->i() == (*vectIt)->i() && (*trav)->j() == (*vectIt)->j())
 			{
+				//cout << "erased " << (*vectIt)->i() << " " <<  (*vectIt)->j() << endl;
 				erase = trav;
 				++trav;
 				roomCycle.erase(erase);
@@ -362,11 +374,78 @@ vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
 				vectIt = roomCycle.begin();
 		while (vectIt != roomCycle.end())
 		{
-			cout << "in room func " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+			//cout << "in room func " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
 			vectIt++;
 		}
 
 	return roomCycle;
+
+}
+
+bool Player::checkPerimeterForAdjWalls(Site* site)
+{
+	int i = site->i();
+	int j = site->j();
+
+	if (i == 0)
+	{
+		if (j == 0)
+		{
+			if (playfield->isWall(i + 1, j + 1) || playfield->isWall(i + 1, j) || playfield->isWall(i, j + 1))
+				return true;
+		}
+
+
+		if (j == N - 1)
+		{
+			if (playfield->isWall(i + 1, j - 1) || playfield->isWall(i + 1, j) || playfield->isWall(i, j - 1))
+				return true;
+		}
+
+		if (playfield->isWall(i + 1, j + 1) || playfield->isWall(i + 1, j) || playfield->isWall(i + 1, j - 1) || playfield->isWall(i, j - 1) || playfield->isWall(i, j + 1))
+				return true;
+
+		return false;
+	}
+
+	if (i == N - 1)
+	{
+		if (j == 0)
+		{
+			if (playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j + 1) || playfield->isWall(i, j + 1))
+				return true;
+		}
+
+		if (j == N - 1)
+		{
+			if (playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j - 1) || playfield->isWall(i, j - 1))
+				return true;
+		}
+
+		if (playfield->isWall(i - 1, j - 1) || playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j + 1) || playfield->isWall(i, j - 1) || playfield->isWall(i, j + 1))
+				return true;
+
+		return false;
+	}
+
+
+	if (j == 0)
+	{
+		if (playfield->isWall(i - 1, j) || playfield->isWall(i + 1, j) || playfield->isWall(i - 1, j + 1) || playfield->isWall(i, j + 1) || playfield->isWall(i + 1, j + 1))
+			return true;
+
+		return false;
+	}
+
+	if (j == N - 1)
+	{
+		if (playfield->isWall(i - 1, j) || playfield->isWall(i + 1, j) || playfield->isWall(i - 1, j - 1) || playfield->isWall(i, j - 1) || playfield->isWall(i + 1, j - 1))
+			return true;
+	}
+
+	return false;
+
+	
 
 }
 
@@ -375,7 +454,7 @@ Site* Player::calculateFinalDestination(Site* nextMove, int**&distPlayer, Site* 
 	unsigned int i;
 	unsigned int j;
 
-	    // Calculate a path to the final destination.
+	    // Calculate a path to the final destination by using the prev array used in bfs.
     i = nextMove->i();
     j = nextMove->j();
 
@@ -1196,7 +1275,7 @@ vector<Site*> Player::removeSitesWithOneAdjacentSite(vector<Site*> myvector)
 	vectIt = myvector.begin();
 	while (vectIt != myvector.end())
 	{
-		cout << "myvector " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
+		//cout << "myvector " << (*vectIt)->i() << " " << (*vectIt)->j() << endl;
 		vectIt++;
 	}
 
@@ -1944,113 +2023,6 @@ bool Player::doCorridorsExist()
                 corridors = true;
 
     return corridors;
-
-}
-
-Site* Player::returnToStart(map<Site*, vector<Site*>> &adj, int **&distPlayer, Site* **&prevPlayer, vector<Site*> &allocatedMemory, Site* &start, const Site* player)
-{
-
-    Site* nextMove = nullptr;
-    unsigned int i;
-    unsigned int j;
-    int shortestDist;
-    map<Site*, vector<Site*>>::iterator it;
-
-    //Dynamically allocate the player's site.
-    nextMove = new Site(player->i(), player->j());
-    allocatedMemory.push_back(nextMove);
-
-    i = player->i();
-    j = player->j();
-
-    // If cycle hasn't been traversed at least one time.
-    if (start == nullptr)
-    {
-        // Initialize shortestDist to first vertex in the adjacency list.
-        it = adj.begin();
-        shortestDist = distPlayer[(it->first)->i()][(it->first)->j()];
-        nextMove = new Site((it->first)->i(), (it->first)->j());
-        allocatedMemory.push_back(nextMove);
-
-        // Calculate the shortest distance to the nearest corridor.
-        while (it != adj.end() && ((it->first)->i() != i || (it->first)->j() != j))
-        {
-            if (distPlayer[(it->first)->i()][(it->first)->j()] < shortestDist)
-            {
-                shortestDist = distPlayer[(it->first)->i()][(it->first)->j()];
-                nextMove = new Site((it->first)->i(), (it->first)->j());
-                allocatedMemory.push_back(nextMove);
-            }
-            it++;
-        }
-
-        i = nextMove->i();
-        j = nextMove->j();
-
-
-        // Starting distance is not 1
-        if (distPlayer[i][j] != 1)
-        {
-
-            while (distPlayer[i][j] != 1)
-            {
-                nextMove = prevPlayer[i][j];
-                i = nextMove->i();
-                j = nextMove->j();
-            }
-            return nextMove;
-
-        }
-
-        // Starting distance is 1 ; therefore, the monster only has to take
-        // one more move to reach the player.
-        else
-        {
-
-            /*
-            nextMove = new Site(player->i(), player->j());
-            allocatedMemory.push_back(nextMove);
-            */
-
-            return nextMove;
-        }
-
-    }
-
-    else if (start != nullptr)
-    {
-
-
-        nextMove = start;
-        i = start->i();
-        j = start->j();
-
-
-        // Starting distance is not 1
-        if (distPlayer[i][j] != 1)
-        {
-
-            while (distPlayer[i][j] != 1)
-            {
-                nextMove = prevPlayer[i][j];
-                i = nextMove->i();
-                j = nextMove->j();
-            }
-
-            return nextMove;
-
-        }
-
-        // Starting distance is 1 ; therefore, the monster only has to take
-        // one more move to reach the player.
-        else
-        {
-
-            return nextMove;
-        }
-
-
-    }
 
 }
 
