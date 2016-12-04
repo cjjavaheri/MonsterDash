@@ -190,6 +190,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     static map<Site*, vector<Site*>> adjConn;
     static map<Site*, vector<Site*>> connectedCycle;
     static map<Site*, vector<Site*>> cycleBetweenRooms;
+    static map<Site*, vector<Site*>> temp;
     vector<Site*>::iterator adjDiscVectIt;
     vector<Site*> adjVect;
     static vector<Site*> roomCycle;
@@ -233,6 +234,9 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
     if (disc != 0)
     {
+
+	temp = adj;
+
         removeDeadEnds(adj);
 
         disc = countDisconnectedComponents(adj);
@@ -241,19 +245,30 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
         if (disc != 0)
         {
             adjDisc = getAdjListDisc(adj, allocatedMemory);
-            return calculateNextRoom(adjDisc, distMonster, distPlayer, prevPlayer, player, monster);
+            nextMove =  calculateNextRoom(adjDisc, distMonster, distPlayer, prevPlayer, player, monster);
+
+	   if (nextMove != nullptr)
+		return nextMove;
+
+	adj = temp;
 
         }
     }
+
     if (adjConn.empty())
         adjConn = findConnectedComponents(adj);
+
 
     if (connectedCycle.empty())
         connectedCycle = getCyclesWithinCorridors(adjConn);
 
+
     if (!connectedCycle.empty())
     {
-        return findCorridorCycle(connectedCycle, distMonster, distPlayer, prevPlayer, player, monster);
+        nextMove = findCorridorCycle(connectedCycle, distMonster, distPlayer, prevPlayer, player, monster);
+
+	if (nextMove != nullptr)
+		return nextMove;
     }
 
     cout << "connected cycle is empty" << endl;
@@ -1364,6 +1379,7 @@ map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site
 
     // Perform a depth first search on all of the adjacent sites.
     // This gives the connected components.
+
     it = adj.begin();
     while (it != adj.end())
     {
@@ -1674,6 +1690,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
     Site* nearestCorr;
     static vector<Site*> cycle;
 
+
     // Save the previous corridor site that the player walks through.
 
     if (playfield->isCorridor(player->i(), player->j()))
@@ -1691,6 +1708,12 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
     // Remove any vertices which have 1 or less than 1 vertices in their
     // adjacency list.
     removeDeadEndVertices(adjDisc);
+
+	if (adjDisc.size() == 0)
+	{
+		cout << "Entered here " << endl;
+		return nullptr;
+	}
 
     // If the monster is right behind the player, simply find a corridor site
     // in the current room with the highest number of adjacent corridor sites
@@ -1727,7 +1750,6 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
         it = adjDisc.begin();
         while (it != adjDisc.end() && (it->first->i() != nearestCorr->i() || it->first->j() != nearestCorr->j()))
             it++;
-
 
         // Look at all of the corridor vertices in the room. Take the path to the corridor site
         // which is the farthes away from the monster's location.
@@ -2402,6 +2424,9 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
 
 
             }
+
+		if (nextMove == nullptr)
+			return nullptr;
 
         }
 
