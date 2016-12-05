@@ -265,7 +265,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
     if (!connectedCycle.empty())
     {
-	adjConn = checkForConnectedDeadEnds(adjConn);
+        adjConn = checkForConnectedDeadEnds(adjConn);
 
         nextMove = findCorridorCycle(connectedCycle, adjConn, distMonster, distPlayer, prevPlayer, player, monster);
 
@@ -890,23 +890,23 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
         if (nextMove == nullptr)
         {
-		if (corridors.size() > 1)
-		{
-		vectIt = corridors.begin();
-		while (vectIt != corridors.end())
-		{
-			decisions.insert({distPlayer[(*vectIt)->i()][(*vectIt)->j()], *vectIt});
-			vectIt++;
-		}
+            if (corridors.size() > 1)
+            {
+                vectIt = corridors.begin();
+                while (vectIt != corridors.end())
+                {
+                    decisions.insert({distPlayer[(*vectIt)->i()][(*vectIt)->j()], *vectIt});
+                    vectIt++;
+                }
 
-		decIt = decisions.begin();
-		nextMove = decIt->second;
-		decisions.clear();
+                decIt = decisions.begin();
+                nextMove = decIt->second;
+                decisions.clear();
 
-		}
+            }
 
-		else
-			nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
+            else
+                nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
 
         }
 
@@ -1740,15 +1740,15 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
     if (distMonster[player->i()][player->j()] < 5 && N > 20 && !cycle.empty())
     {
         run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
-	if (nearestCorr == nullptr)
-		return nullptr;
+        if (nearestCorr == nullptr)
+            return nullptr;
     }
 
     else if (distMonster[player->i()][player->j()] < 3 && N <= 20 && !cycle.empty())
     {
         run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
-	if (nearestCorr == nullptr)
-		return nullptr;
+        if (nearestCorr == nullptr)
+            return nullptr;
     }
 
     else
@@ -1881,23 +1881,23 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
 
             vectIt++;
         }
-	
-	if (vertices.size() != 0)
-	{
-        	myVertices = vertices.begin();
 
-        	while (myVertices != vertices.end())
-		{
-			cout << myVertices->second->i() << " " << myVertices->second->j() << endl;
-            		myVertices++;
-		}
+        if (vertices.size() != 0)
+        {
+            myVertices = vertices.begin();
 
-        	myVertices--;
-        	nearestCorr = myVertices->second;
+            while (myVertices != vertices.end())
+            {
+                cout << myVertices->second->i() << " " << myVertices->second->j() << endl;
+                myVertices++;
+            }
 
-	}
-	else
-		nearestCorr = nullptr;
+            myVertices--;
+            nearestCorr = myVertices->second;
+
+        }
+        else
+            nearestCorr = nullptr;
 
     }
 
@@ -1905,9 +1905,9 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
     // room site has a higher distance away from the monster.
     else
     {
-	
-	initialI = nearestCorr->i();
-	initialJ = nearestCorr->j();
+
+        initialI = nearestCorr->i();
+        initialJ = nearestCorr->j();
 
         longestDist = distMonster[i][j];
         if (i + 1 < N)
@@ -1927,12 +1927,12 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
             if (distMonster[i][j - 1] > longestDist && playfield->isRoom(i, j - 1))
                 nearestCorr = new Site(i, j - 1);
 
-	if (nearestCorr->i() == player->i() && nearestCorr->j() == player->j())
-		nearestCorr = nullptr;
+        if (nearestCorr->i() == player->i() && nearestCorr->j() == player->j())
+            nearestCorr = nullptr;
 
-	if (nearestCorr != nullptr)
-		if (initialI == nearestCorr->i() && initialJ == nearestCorr->j())
-			nearestCorr = nullptr;
+        if (nearestCorr != nullptr)
+            if (initialI == nearestCorr->i() && initialJ == nearestCorr->j())
+                nearestCorr = nullptr;
 
 
     }
@@ -1993,8 +1993,8 @@ void Player::removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc)
                 ++vectIt;
                 (it->second).erase(eraseVect);
 
-		if (it->second.size() == 1 && vectIt != it->second.end() && vectIt != it->second.begin())
-			vectIt = it->second.begin();
+                if (it->second.size() == 1 && vectIt != it->second.end() && vectIt != it->second.begin())
+                    vectIt = it->second.begin();
             }
 
             else
@@ -2427,79 +2427,79 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
         if (connectedCycle.size() == 1)
         {
 
-		it = connectedCycle.begin();
+            it = connectedCycle.begin();
 
-		while (it != connectedCycle.end())
-		{
-		vectIt = it->second.begin();
+            while (it != connectedCycle.end())
+            {
+                vectIt = it->second.begin();
 
-		while (vectIt != it->second.end())
-		{
-			i = (*vectIt)->i();
-			j = (*vectIt)->j();
+                while (vectIt != it->second.end())
+                {
+                    i = (*vectIt)->i();
+                    j = (*vectIt)->j();
 
-			if (distPlayer[i][j] <= distMonster[i][j])
-				decisions.insert({distMonster[i][j], *vectIt});
+                    if (distPlayer[i][j] <= distMonster[i][j])
+                        decisions.insert({distMonster[i][j], *vectIt});
 
-			vectIt++;
-		}
-		it++;
-		}
+                    vectIt++;
+                }
+                it++;
+            }
 
-		if (!decisions.empty())
-		{
-			decIt = decisions.end();	
-			decIt--;
-			nextMove = decIt->second;
-			
-		}
+            if (!decisions.empty())
+            {
+                decIt = decisions.end();
+                decIt--;
+                nextMove = decIt->second;
 
-		else if (decisions.empty())
-		{
+            }
 
-			it = adjConn.begin();
-			while (it != adjConn.end())
-			{
-				vectIt = it->second.begin();
-				while (vectIt != it->second.end())
-				{
-					i = (*vectIt)->i();
-					j = (*vectIt)->j();
+            else if (decisions.empty())
+            {
 
-					if (distPlayer[i][j] < distMonster[i][j])
-						return nullptr;
+                it = adjConn.begin();
+                while (it != adjConn.end())
+                {
+                    vectIt = it->second.begin();
+                    while (vectIt != it->second.end())
+                    {
+                        i = (*vectIt)->i();
+                        j = (*vectIt)->j();
 
-					vectIt++;
-						
-				}
+                        if (distPlayer[i][j] < distMonster[i][j])
+                            return nullptr;
 
-				it++;
-			}
-		}
+                        vectIt++;
 
-		else
-		{
-            		it = connectedCycle.begin();
-            		while (it != connectedCycle.end())
-            		{
-                		vectIt = it->second.begin();
-                		shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
-                		nextMove = *vectIt;
-                		while (vectIt != it->second.end())
-                		{
-                    			if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < shortestDist)
-                    			{
-                        			shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
-                        			nextMove = *vectIt;
-                    			}
+                    }
 
-                    			vectIt++;
-                		}
+                    it++;
+                }
+            }
 
-                		it++;
-            		}
+            else
+            {
+                it = connectedCycle.begin();
+                while (it != connectedCycle.end())
+                {
+                    vectIt = it->second.begin();
+                    shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+                    nextMove = *vectIt;
+                    while (vectIt != it->second.end())
+                    {
+                        if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < shortestDist)
+                        {
+                            shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+                            nextMove = *vectIt;
+                        }
 
-		}
+                        vectIt++;
+                    }
+
+                    it++;
+                }
+
+            }
 
         }
 
@@ -2512,81 +2512,81 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
 
 
 
-		it = connectedCycle.begin();
-
-		while (it != connectedCycle.end())
-		{
-		vectIt = it->second.begin();
-
-		while (vectIt != it->second.end())
-		{
-			i = (*vectIt)->i();
-			j = (*vectIt)->j();
-
-			if (distPlayer[i][j] <= distMonster[i][j])
-				decisions.insert({distMonster[i][j], *vectIt});
-
-			vectIt++;
-		}
-		it++;
-		}
-
-		if (!decisions.empty())
-		{
-			decIt = decisions.end();	
-			decIt--;
-			nextMove = decIt->second;
-			
-		}
-		else if (decisions.empty())
-		{
-			it = adjConn.begin();
-			while (it != adjConn.end())
-			{
-				vectIt = it->second.begin();
-				while (vectIt != it->second.end())
-				{
-					i = (*vectIt)->i();
-					j = (*vectIt)->j();
-
-					if (distPlayer[i][j] < distMonster[i][j])
-						return nullptr;
-
-					vectIt++;
-						
-				}
-
-				it++;
-			}
-		}
-
-
-	    else
-	{
-
             it = connectedCycle.begin();
+
             while (it != connectedCycle.end())
             {
                 vectIt = it->second.begin();
+
                 while (vectIt != it->second.end())
                 {
-                    if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < distMonster[(*vectIt)->i()][(*vectIt)->j()])
-                    {
-                        nextMove = *vectIt;
-                    }
+                    i = (*vectIt)->i();
+                    j = (*vectIt)->j();
+
+                    if (distPlayer[i][j] <= distMonster[i][j])
+                        decisions.insert({distMonster[i][j], *vectIt});
 
                     vectIt++;
                 }
-
                 it++;
-
-
             }
 
-            if (nextMove == nullptr)
-                return nullptr;
+            if (!decisions.empty())
+            {
+                decIt = decisions.end();
+                decIt--;
+                nextMove = decIt->second;
 
-	}
+            }
+            else if (decisions.empty())
+            {
+                it = adjConn.begin();
+                while (it != adjConn.end())
+                {
+                    vectIt = it->second.begin();
+                    while (vectIt != it->second.end())
+                    {
+                        i = (*vectIt)->i();
+                        j = (*vectIt)->j();
+
+                        if (distPlayer[i][j] < distMonster[i][j])
+                            return nullptr;
+
+                        vectIt++;
+
+                    }
+
+                    it++;
+                }
+            }
+
+
+            else
+            {
+
+                it = connectedCycle.begin();
+                while (it != connectedCycle.end())
+                {
+                    vectIt = it->second.begin();
+                    while (vectIt != it->second.end())
+                    {
+                        if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < distMonster[(*vectIt)->i()][(*vectIt)->j()])
+                        {
+                            nextMove = *vectIt;
+                        }
+
+                        vectIt++;
+                    }
+
+                    it++;
+
+
+                }
+
+                if (nextMove == nullptr)
+                    return nullptr;
+
+            }
 
         }
 
