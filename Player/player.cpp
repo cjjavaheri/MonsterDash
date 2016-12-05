@@ -246,9 +246,9 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
         {
             adjDisc = getAdjListDisc(adj, allocatedMemory);
             nextMove =  calculateNextRoom(adjDisc, distMonster, distPlayer, prevPlayer, player, monster);
-
             if (nextMove != nullptr)
                 return nextMove;
+
 
             adj = temp;
 
@@ -888,7 +888,6 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
         if (nextMove == nullptr)
         {
-
 		if (corridors.size() > 1)
 		{
 		vectIt = corridors.begin();
@@ -1739,16 +1738,19 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
     if (distMonster[player->i()][player->j()] < 5 && N > 20 && !cycle.empty())
     {
         run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
+	if (nearestCorr == nullptr)
+		return nullptr;
     }
 
     else if (distMonster[player->i()][player->j()] < 6 && N <= 20 && !cycle.empty())
     {
         run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
+	if (nearestCorr == nullptr)
+		return nullptr;
     }
 
     else
     {
-
         // If the monster is not right behind the player, then find the nearest corridor site.
         it = adjDisc.begin();
         shortestDist = distPlayer[it->first->i()][it->first->j()];
@@ -1786,7 +1788,6 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
         }
 
     }
-
     return calculateFinalDestination(nearestCorr, distPlayer, prevPlayer, player);
 }
 
@@ -1796,6 +1797,8 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
     int j = player->j();
     unsigned int a;
     unsigned int b;
+    unsigned int initialI;
+    unsigned int initialJ;
     int longestDist;
     vector<Site*> vectDisc;
     vector<Site*>::iterator vectIt;
@@ -1854,7 +1857,6 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
         }
 
 
-
         // Check each corridor site adjacent to the current room the player is in.
         // Take the path to the one with the highest number of adjacent vertices.
         vectIt = vectDisc.begin();
@@ -1877,14 +1879,23 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
 
             vectIt++;
         }
+	
+	if (vertices.size() != 0)
+	{
+        	myVertices = vertices.begin();
 
-        myVertices = vertices.begin();
+        	while (myVertices != vertices.end())
+		{
+			cout << myVertices->second->i() << " " << myVertices->second->j() << endl;
+            		myVertices++;
+		}
 
-        while (myVertices != vertices.end())
-            myVertices++;
+        	myVertices--;
+        	nearestCorr = myVertices->second;
 
-        myVertices--;
-        nearestCorr = myVertices->second;
+	}
+	else
+		nearestCorr = nullptr;
 
     }
 
@@ -1892,6 +1903,10 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
     // room site has a higher distance away from the monster.
     else
     {
+	
+	initialI = nearestCorr->i();
+	initialJ = nearestCorr->j();
+
         longestDist = distMonster[i][j];
         if (i + 1 < N)
             if (distMonster[i + 1][j] > longestDist && playfield->isRoom(i + 1, j))
@@ -1909,6 +1924,13 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
         if (j - 1 > -1)
             if (distMonster[i][j - 1] > longestDist && playfield->isRoom(i, j - 1))
                 nearestCorr = new Site(i, j - 1);
+
+	if (nearestCorr->i() == player->i() && nearestCorr->j() == player->j())
+		nearestCorr = nullptr;
+
+	if (nearestCorr != nullptr)
+		if (initialI == nearestCorr->i() && initialJ == nearestCorr->j())
+			nearestCorr = nullptr;
 
 
     }
@@ -1968,6 +1990,9 @@ void Player::removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc)
                 eraseVect = vectIt;
                 ++vectIt;
                 (it->second).erase(eraseVect);
+
+		if (it->second.size() == 1 && vectIt != it->second.end() && vectIt != it->second.begin())
+			vectIt = it->second.begin();
             }
 
             else
