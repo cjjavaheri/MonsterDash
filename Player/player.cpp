@@ -2523,7 +2523,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
                     i = (*vectIt)->i();
                     j = (*vectIt)->j();
 
-                    if (distPlayer[i][j] <= distMonster[i][j])
+                    if (distPlayer[i][j] < distMonster[i][j])
                         decisions.insert({distMonster[i][j], *vectIt});
 
                     vectIt++;
