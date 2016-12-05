@@ -40,7 +40,7 @@ class Player
 
 
 
-	Site* findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster);
+	Site* findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Site*, vector<Site*>> adjConn, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster);
 
 
 

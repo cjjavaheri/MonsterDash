@@ -265,7 +265,9 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
     if (!connectedCycle.empty())
     {
-        nextMove = findCorridorCycle(connectedCycle, distMonster, distPlayer, prevPlayer, player, monster);
+	adjConn = checkForConnectedDeadEnds(adjConn);
+
+        nextMove = findCorridorCycle(connectedCycle, adjConn, distMonster, distPlayer, prevPlayer, player, monster);
 
         if (nextMove != nullptr)
             return nextMove;
@@ -1742,7 +1744,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 		return nullptr;
     }
 
-    else if (distMonster[player->i()][player->j()] < 6 && N <= 20 && !cycle.empty())
+    else if (distMonster[player->i()][player->j()] < 3 && N <= 20 && !cycle.empty())
     {
         run(player, nearestCorr, distPlayer, distMonster, cycle, adjDisc);
 	if (nearestCorr == nullptr)
@@ -2399,7 +2401,7 @@ bool Player::doCorridorsExist()
 
 }
 
-Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
+Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Site*, vector<Site*>> adjConn, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
 {
     map<Site*, vector<Site*>>::iterator it;
     vector<Site*>::iterator vectIt;
@@ -2410,6 +2412,8 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
     unsigned int j;
     int longestDist;
     int shortestDist;
+    multimap<int, Site*> decisions;
+    multimap<int, Site*>::iterator decIt;
 
     // Determine if the player is on a site in the cycle.
     inCycle = isPlayerInCorridorCycle(connectedCycle, player);
@@ -2422,25 +2426,80 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
         // If only one cycle, find shortest path to that cycle.
         if (connectedCycle.size() == 1)
         {
-            it = connectedCycle.begin();
-            while (it != connectedCycle.end())
-            {
-                vectIt = it->second.begin();
-                shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
-                nextMove = *vectIt;
-                while (vectIt != it->second.end())
-                {
-                    if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < shortestDist)
-                    {
-                        shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
-                        nextMove = *vectIt;
-                    }
 
-                    vectIt++;
-                }
+		it = connectedCycle.begin();
 
-                it++;
-            }
+		while (it != connectedCycle.end())
+		{
+		vectIt = it->second.begin();
+
+		while (vectIt != it->second.end())
+		{
+			i = (*vectIt)->i();
+			j = (*vectIt)->j();
+
+			if (distPlayer[i][j] <= distMonster[i][j])
+				decisions.insert({distMonster[i][j], *vectIt});
+
+			vectIt++;
+		}
+		it++;
+		}
+
+		if (!decisions.empty())
+		{
+			decIt = decisions.end();	
+			decIt--;
+			nextMove = decIt->second;
+			
+		}
+
+		else if (decisions.empty())
+		{
+
+			it = adjConn.begin();
+			while (it != adjConn.end())
+			{
+				vectIt = it->second.begin();
+				while (vectIt != it->second.end())
+				{
+					i = (*vectIt)->i();
+					j = (*vectIt)->j();
+
+					if (distPlayer[i][j] < distMonster[i][j])
+						return nullptr;
+
+					vectIt++;
+						
+				}
+
+				it++;
+			}
+		}
+
+		else
+		{
+            		it = connectedCycle.begin();
+            		while (it != connectedCycle.end())
+            		{
+                		vectIt = it->second.begin();
+                		shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+                		nextMove = *vectIt;
+                		while (vectIt != it->second.end())
+                		{
+                    			if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < shortestDist)
+                    			{
+                        			shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+                        			nextMove = *vectIt;
+                    			}
+
+                    			vectIt++;
+                		}
+
+                		it++;
+            		}
+
+		}
 
         }
 
@@ -2449,6 +2508,62 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
             // There's more than one cycle, so choose the cycle that the player
             // can reach by seeing if the cycle can be reached in less moves
             // than the monster can reach it with.
+
+
+
+
+		it = connectedCycle.begin();
+
+		while (it != connectedCycle.end())
+		{
+		vectIt = it->second.begin();
+
+		while (vectIt != it->second.end())
+		{
+			i = (*vectIt)->i();
+			j = (*vectIt)->j();
+
+			if (distPlayer[i][j] <= distMonster[i][j])
+				decisions.insert({distMonster[i][j], *vectIt});
+
+			vectIt++;
+		}
+		it++;
+		}
+
+		if (!decisions.empty())
+		{
+			decIt = decisions.end();	
+			decIt--;
+			nextMove = decIt->second;
+			
+		}
+		else if (decisions.empty())
+		{
+			it = adjConn.begin();
+			while (it != adjConn.end())
+			{
+				vectIt = it->second.begin();
+				while (vectIt != it->second.end())
+				{
+					i = (*vectIt)->i();
+					j = (*vectIt)->j();
+
+					if (distPlayer[i][j] < distMonster[i][j])
+						return nullptr;
+
+					vectIt++;
+						
+				}
+
+				it++;
+			}
+		}
+
+
+	    else
+	{
+
             it = connectedCycle.begin();
             while (it != connectedCycle.end())
             {
@@ -2470,6 +2585,8 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, int **
 
             if (nextMove == nullptr)
                 return nullptr;
+
+	}
 
         }
 
