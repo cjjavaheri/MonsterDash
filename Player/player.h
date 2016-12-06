@@ -60,7 +60,7 @@ class Player
 	void checkDuplicates(vector<Site*> &vectDisc, Site* site);
 
 
-	Site* calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster);
+	Site* calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster, map<Site*, vector<Site*>> connectedCycle);
 
 	void removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc);
 
