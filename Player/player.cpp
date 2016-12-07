@@ -1,4 +1,62 @@
 
+/*************************************************************************//**
+ * @file player.cpp
+ * 
+ * @brief A program which contains a monster and player. Monster's goal is to catch the player.
+ * The player's goal to is to avoid the monster.
+ *
+ * @mainpage Monster Dash
+ *
+ * @section course_section Course Information
+ *
+ * @author Cameron Javaheri
+ *
+ * @date due 12/12/2016
+ *
+ * @par Professor:
+ *		Paul Hinker
+ *
+ * @par Course:
+ *      CSC 300 - Fall 2016 - M002 - 2pm
+ *
+ * @par Location:
+		McLaury - 310
+ *
+ *
+ * @details This paint program was created based on files originally
+ * written by Dr. Paul Hinker and John M. Weiss, Ph.D.. We have now
+ * combined those files and some of our own code to make a paint program
+ * as a class assignment for CSC 300 with Dr. Paul Hinker. This paint
+ * program allows the user to create, move, delete, and reorder several
+ * different types of shapes and lines, in various colors.
+ * 
+ *  @section compile_section Compiling and Usage
+ *
+ * @par Compiling Instructions:
+ *      None
+ *
+ * @par Usage:
+   @verbatim
+   % make
+   % main Playfields/A.in
+   @endverbatim
+ *
+ * @section todo_bugs_modification_section Todo, Bugs, and Modifications
+ *
+ * @bug none
+ *
+ * @todo none
+ *
+ * @par Modifications and Development Timeline:
+   @verbatim
+   Gitlab Repository: https://gitlab.mcs.sdsmt.edu/7300226/csc300_fall2016_project1.git
+   @endverbatim
+ *
+ *
+ ****************************************************************************/
+
+
+
 #include "player.h"
 
 using namespace std;
@@ -59,6 +117,22 @@ const Site* Player::move()
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief This function takes in a vector of rooms and returns the adjacency list
+ * of the rooms.
+ *
+ * @par Description
+ *   findAdjRoomLists finds all of the adjacent rooms to each vertex, then stores each vertex
+ * in a map along with their adjacency list as a vector.
+ *
+ * @param[in] rooms - All of the rooms which you want to find the adjacency list for.
+ * They must all be stored in a vector.
+ *
+ * @return A map containing the adjacency list for all of the room sites.
+ ******************************************************************************/
+
 map<Site*, vector<Site*>> Player::findAdjRoomLists(vector<Site*> rooms)
 {
     vector<Site*>::iterator it;
@@ -69,7 +143,7 @@ map<Site*, vector<Site*>> Player::findAdjRoomLists(vector<Site*> rooms)
     map<Site*, vector<Site*>> adj;
 
     curr = rooms.begin();
-    // For each corridor site, check all of the corridor sites to see which ones are adjacent.
+    // For each room, check all of the room sites to see which ones are adjacent.
     while (curr != rooms.end())
     {
         currSite = (*curr);
@@ -122,6 +196,19 @@ map<Site*, vector<Site*>> Player::findAdjRoomLists(vector<Site*> rooms)
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief This function takes in a EMPTY vector and stores every site on the playfield
+ * into that vector.
+ *
+ * @par Description
+ *   Stores all corridors on the playfield into a vector.
+ *
+ * @param[in, out] corridors - An EMPTY vector used to store the corridor sites.
+ *
+ * @return A vector containing every corridor site on the playfield.
+ ******************************************************************************/
+
 vector<Site*> Player::findCorridors(vector<Site*> &corridors)
 {
     int i;
@@ -146,7 +233,37 @@ vector<Site*> Player::findCorridors(vector<Site*> &corridors)
 }
 
 
-
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief Calculates the next move the player should take.
+ *
+ * @par Description
+ *   This function is similar to the "main" function. It does all of the heavy lifting
+ * for the player by calling all of the functions necessary to analyze the entire
+ * playfield. Once analyzed, the player can make the optimal move based on the data.
+ *
+ *
+ * @param[in, out] markedMonster - A 2D array of bools. They are marked true if
+ * the monster can reach the (i, j) position on the map, and false otherwise.
+ * @param[in, out] prevMonster - An array containing site pointers from a
+ * a breadth first search performed from the monster's site. They are the
+ * exact locations the monster can move to.
+ * @param[in, out] distMonster - A 2D array containing the shortest distances from the
+ * monster's position to any reachable site on the map.
+ * @param[in, out] prevPlayer - The locations obtained from performing a breadth
+ * first search on the player.
+ * @param[in, out] markedPlayer - Same as markedMonster, except they are marked
+ * true if the player can reach the (i, j) position and false otherwise.
+ * @param[in, out] distPlayer - The shortest path distances to each site
+ * from the player.
+ * @param[in] monster - The site which the monster is currently on.
+ * @param[in] player - The site which the player is currently on.
+ * @param[in, out] allocatedMemory - Stores any allocated memory for cleanup.
+ * @param[in, out] adj - Contains the adjacency list for each and every corridor
+ * site on the playfield.
+ *
+ * @return A legal move (the player's next move).
+ ******************************************************************************/
 
 
 Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&distMonster, bool **&markedPlayer, Site* **&prevPlayer, int **&distPlayer, const Site* monster, const Site* player, vector<Site*> &allocatedMemory, map<Site*, vector<Site*>> &adj)
