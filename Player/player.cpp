@@ -39,8 +39,8 @@ const Site* Player::move()
 
     bfs(markedPlayer, prevPlayer, distPlayer, player, allocatedMemory);
 
-	if (!markedPlayer[monster->i()][monster->j()])
-		return player;
+    if (!markedPlayer[monster->i()][monster->j()])
+        return player;
 
     // Store all corridor sites in a vector.
     findCorridors(corridors);
@@ -202,7 +202,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     cout << "Disc: " << disc << endl;
 
 
-	    if (adjConn.empty())
+    if (adjConn.empty())
         adjConn = findConnectedComponents(adj);
 
 
@@ -829,9 +829,9 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
     int longestDist;
     bool inCycle;
 
-	inCycle = isPlayerInConnectedRoomCycle(cycleBetweenRooms, player);
+    inCycle = isPlayerInConnectedRoomCycle(cycleBetweenRooms, player);
 
-	cout << "inConnRoomCycle: " << inCycle << endl;
+    cout << "inConnRoomCycle: " << inCycle << endl;
 
 
     if (playfield->isCorridor(player))
@@ -893,88 +893,88 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
     else
     {
 
-	nextMove = nullptr;
-	if (!inCycle)
-	{
-		it = cycleBetweenRooms.begin();
-		while (it != cycleBetweenRooms.end())
-		{
-			vectIt = it->second.begin();
-			while (vectIt != it->second.end())
-			{
-				i = (*vectIt)->i();
-				j = (*vectIt)->j();
-
-				if (distPlayer[i][j] < distMonster[i][j] && distPlayer[i][j] != 0)
-					nextMove = *vectIt;
-
-				vectIt++;
-			}
-
-			it++;
-		}
-
-	}
-
-	if (nextMove == nullptr)
-	{
-        // Player must be on a corridor site.
-        i = player->i();
-        j = player->j();
-
-        longestDist = distMonster[i][j];
-        nextMove = new Site(i, j);
-
-        // Check if there is an adjacent room to the corridor site the player is standing on.
-        if (hasAdjacentRoom(nextMove))
+        nextMove = nullptr;
+        if (!inCycle)
         {
-            // For each of the 4 possible choices, check to make sure it's legal
-            // and it's a larger distance away from the monster.
-            if (playfield->isRoom(i + 1, j) || playfield->isCorridor(i + 1, j))
+            it = cycleBetweenRooms.begin();
+            while (it != cycleBetweenRooms.end())
             {
-                if (distMonster[i + 1][j] > longestDist)
+                vectIt = it->second.begin();
+                while (vectIt != it->second.end())
                 {
-                    longestDist = distMonster[i + 1][j];
-                    nextMove = new Site(i + 1, j);
+                    i = (*vectIt)->i();
+                    j = (*vectIt)->j();
+
+                    if (distPlayer[i][j] < distMonster[i][j] && distPlayer[i][j] != 0)
+                        nextMove = *vectIt;
+
+                    vectIt++;
                 }
+
+                it++;
             }
 
-            if (playfield->isRoom(i - 1, j) || playfield->isCorridor(i - 1, j))
-            {
-                if (distMonster[i - 1][j] > longestDist)
-                {
-                    longestDist = distMonster[i - 1][j];
-                    nextMove = new Site(i - 1, j);
-                }
-            }
-
-            if (playfield->isRoom(i, j + 1) || playfield->isCorridor(i, j + 1))
-            {
-                if (distMonster[i][j + 1] > longestDist)
-                {
-                    longestDist = distMonster[i][j + 1];
-                    nextMove = new Site(i, j + 1);
-                }
-            }
-
-            if (playfield->isRoom(i, j - 1) || playfield->isCorridor(i, j - 1))
-            {
-                if (distMonster[i][j - 1] > longestDist)
-                {
-                    longestDist = distMonster[i][j - 1];
-                    nextMove = new Site(i, j - 1);
-                }
-            }
         }
 
-        else
+        if (nextMove == nullptr)
         {
-            // The player is standing on a corridor site that does not have
-            // an adjacent room next to it.
-            nextMove = chooseNextCorridor(cycleBetweenRooms, distPlayer, distMonster, player);
-        }
+            // Player must be on a corridor site.
+            i = player->i();
+            j = player->j();
 
-	}
+            longestDist = distMonster[i][j];
+            nextMove = new Site(i, j);
+
+            // Check if there is an adjacent room to the corridor site the player is standing on.
+            if (hasAdjacentRoom(nextMove))
+            {
+                // For each of the 4 possible choices, check to make sure it's legal
+                // and it's a larger distance away from the monster.
+                if (playfield->isRoom(i + 1, j) || playfield->isCorridor(i + 1, j))
+                {
+                    if (distMonster[i + 1][j] > longestDist)
+                    {
+                        longestDist = distMonster[i + 1][j];
+                        nextMove = new Site(i + 1, j);
+                    }
+                }
+
+                if (playfield->isRoom(i - 1, j) || playfield->isCorridor(i - 1, j))
+                {
+                    if (distMonster[i - 1][j] > longestDist)
+                    {
+                        longestDist = distMonster[i - 1][j];
+                        nextMove = new Site(i - 1, j);
+                    }
+                }
+
+                if (playfield->isRoom(i, j + 1) || playfield->isCorridor(i, j + 1))
+                {
+                    if (distMonster[i][j + 1] > longestDist)
+                    {
+                        longestDist = distMonster[i][j + 1];
+                        nextMove = new Site(i, j + 1);
+                    }
+                }
+
+                if (playfield->isRoom(i, j - 1) || playfield->isCorridor(i, j - 1))
+                {
+                    if (distMonster[i][j - 1] > longestDist)
+                    {
+                        longestDist = distMonster[i][j - 1];
+                        nextMove = new Site(i, j - 1);
+                    }
+                }
+            }
+
+            else
+            {
+                // The player is standing on a corridor site that does not have
+                // an adjacent room next to it.
+                nextMove = chooseNextCorridor(cycleBetweenRooms, distPlayer, distMonster, player);
+            }
+
+        }
     }
 
 
@@ -984,32 +984,32 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
 bool Player::isPlayerInConnectedRoomCycle(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player)
 {
-	map<Site*, vector<Site*>>::iterator it;
-	vector<Site*>::iterator vectIt;
-	unsigned int i;
-	unsigned int j;
+    map<Site*, vector<Site*>>::iterator it;
+    vector<Site*>::iterator vectIt;
+    unsigned int i;
+    unsigned int j;
 
-	it = cycleBetweenRooms.begin();
-	while (it != cycleBetweenRooms.end())
-	{
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			i = (*vectIt)->i();
-			j = (*vectIt)->j();
+    it = cycleBetweenRooms.begin();
+    while (it != cycleBetweenRooms.end())
+    {
+        vectIt = it->second.begin();
+        while (vectIt != it->second.end())
+        {
+            i = (*vectIt)->i();
+            j = (*vectIt)->j();
 
-			if (i == player->i() && j == player->j())
-				return true;
+            if (i == player->i() && j == player->j())
+                return true;
 
-			vectIt++;
-		}
+            vectIt++;
+        }
 
-		it++;
-	}
+        it++;
+    }
 
 
 
-	return false;
+    return false;
 
 }
 
@@ -1771,50 +1771,50 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
     // adjacency list.
 
 
-		it = connectedCycle.begin();
-	while (it != connectedCycle.end())
-	{
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			i = (*vectIt)->i();
-			j = (*vectIt)->j();
+    it = connectedCycle.begin();
+    while (it != connectedCycle.end())
+    {
+        vectIt = it->second.begin();
+        while (vectIt != it->second.end())
+        {
+            i = (*vectIt)->i();
+            j = (*vectIt)->j();
 
-			if (distPlayer[i][j] <= distMonster[i][j])
-				return nullptr;
+            if (distPlayer[i][j] <= distMonster[i][j])
+                return nullptr;
 
-			vectIt++;
-		}
+            vectIt++;
+        }
 
-		it++;
-	}
+        it++;
+    }
 
-	if (connectedComponents.empty())
-	{
-		findCorridors(corridors);
-		connectedComponents = findAdjLists(corridors);
-		connectedComponents = findConnectedComponents(connectedComponents);
-		connectedComponents = checkForConnectedDeadEnds(connectedComponents);
+    if (connectedComponents.empty())
+    {
+        findCorridors(corridors);
+        connectedComponents = findAdjLists(corridors);
+        connectedComponents = findConnectedComponents(connectedComponents);
+        connectedComponents = checkForConnectedDeadEnds(connectedComponents);
 
-	}
+    }
 
-	it = connectedComponents.begin();
-	while (it != connectedComponents.end())
-	{
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			i = (*vectIt)->i();
-			j = (*vectIt)->j();
+    it = connectedComponents.begin();
+    while (it != connectedComponents.end())
+    {
+        vectIt = it->second.begin();
+        while (vectIt != it->second.end())
+        {
+            i = (*vectIt)->i();
+            j = (*vectIt)->j();
 
-			if (distPlayer[i][j] < distMonster[i][j])
-				return nullptr;
+            if (distPlayer[i][j] < distMonster[i][j])
+                return nullptr;
 
-			vectIt++;
-		}
+            vectIt++;
+        }
 
-		it++;
-	}
+        it++;
+    }
 
 
 
@@ -2091,10 +2091,10 @@ void Player::removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc)
                 ++vectIt;
                 (it->second).erase(eraseVect);
 
-		vectIt--;
+                vectIt--;
 
-		if (vectIt != it->second.end())
-			vectIt++;
+                if (vectIt != it->second.end())
+                    vectIt++;
 
                 if (it->second.size() == 1 && vectIt != it->second.end() && vectIt != it->second.begin())
                     vectIt = it->second.begin();
@@ -2526,53 +2526,53 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
     bool corridorCycle = false;
 
 
-	if (connectedComponents.empty())
-	{
-		findCorridors(corridors);
-		connectedComponents = findAdjLists(corridors);
-		connectedComponents = findConnectedComponents(connectedComponents);
-		connectedComponents = checkForConnectedDeadEnds(connectedComponents);
+    if (connectedComponents.empty())
+    {
+        findCorridors(corridors);
+        connectedComponents = findAdjLists(corridors);
+        connectedComponents = findConnectedComponents(connectedComponents);
+        connectedComponents = checkForConnectedDeadEnds(connectedComponents);
 
-	}
+    }
 
-	it = connectedComponents.begin();
-	while (it != connectedComponents.end())
-	{
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			i = (*vectIt)->i();
-			j = (*vectIt)->j();
+    it = connectedComponents.begin();
+    while (it != connectedComponents.end())
+    {
+        vectIt = it->second.begin();
+        while (vectIt != it->second.end())
+        {
+            i = (*vectIt)->i();
+            j = (*vectIt)->j();
 
-			if (distPlayer[i][j] < distMonster[i][j])
-				roomCycle = true;
+            if (distPlayer[i][j] < distMonster[i][j])
+                roomCycle = true;
 
-			vectIt++;
-		}
+            vectIt++;
+        }
 
-		it++;
-	}
+        it++;
+    }
 
-	it = connectedCycle.begin();
-	while (it != connectedCycle.end())
-	{
-		vectIt = it->second.begin();
-		while (vectIt != it->second.end())
-		{
-			i = (*vectIt)->i();
-			j = (*vectIt)->j();
+    it = connectedCycle.begin();
+    while (it != connectedCycle.end())
+    {
+        vectIt = it->second.begin();
+        while (vectIt != it->second.end())
+        {
+            i = (*vectIt)->i();
+            j = (*vectIt)->j();
 
-			if (distPlayer[i][j] <= distMonster[i][j])
-				corridorCycle = true;
+            if (distPlayer[i][j] <= distMonster[i][j])
+                corridorCycle = true;
 
-			vectIt++;
-		}
+            vectIt++;
+        }
 
-		it++;
-	}
+        it++;
+    }
 
-	if (roomCycle && !corridorCycle)
-		return nullptr;
+    if (roomCycle && !corridorCycle)
+        return nullptr;
 
 
 
