@@ -1,7 +1,7 @@
 
 /*************************************************************************//**
  * @file player.cpp
- * 
+ *
  * @brief A program which contains a monster and player. Monster's goal is to catch the player.
  * The player's goal to is to avoid the monster.
  *
@@ -29,7 +29,7 @@
  * forever, thereby evading the monster indefinitely. The game is over once the player is
  * either caught, which in that case the monster wins, or the player survives a specified
  * number of moves, in which case the player wins.
- * 
+ *
  *  @section compile_section Compiling and Usage
  *
  * @par Compiling Instructions:
@@ -68,7 +68,7 @@ using namespace std;
  * @par Description
  *  This function is a constructor for a player object. It initializes the
  * playfield as well as the size of the playfield.
- * 
+ *
  * @param[in] p - The playfield.
  *
  ******************************************************************************/
@@ -95,7 +95,7 @@ Player::Player(Playfield* p)
 
 const Site* Player::move()
 {
-    
+
     const Site* player   = playfield->getPlayerSite();
     const Site* monster = playfield->getMonsterSite();
     vector<Site*> corridors;
@@ -248,7 +248,7 @@ vector<Site*> Player::findCorridors(vector<Site*> &corridors)
                 addSite = new Site(i, j);
                 if (playfield->isCorridor(addSite))
                 {
-                   
+
                     corridors.push_back(addSite);
                 }
             }
@@ -341,7 +341,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     }
 
     disc = countDisconnectedComponents(adj);
- 
+
 
 
     if (adjConn.empty())
@@ -360,7 +360,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
         removeDeadEnds(adj);
 
         disc = countDisconnectedComponents(adj);
-   
+
 
         if (disc != 0)
         {
@@ -386,18 +386,18 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
             return nextMove;
     }
 
-  
+
     adjConn = checkForConnectedDeadEnds(adjConn);
     nextMove = findCyclesBetweenRooms(adjConn, adj, distMonster, distPlayer, prevPlayer, player, monster);
 
     it = adjConn.begin();
     while (it != adjConn.end())
     {
-       
+
         vectIt = it->second.begin();
         while (vectIt != it->second.end())
         {
-            
+
             vectIt++;
         }
 
@@ -477,11 +477,11 @@ map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
  *
  * @par Description
  *   The function decides what the best path to take is based upon knowing
- * a cycle between room sites, the distance from the monster to that cycle, 
- * and the distance from the player to that cycle. If the distance from the 
+ * a cycle between room sites, the distance from the monster to that cycle,
+ * and the distance from the player to that cycle. If the distance from the
  * the player to that cycle is smaller than the distance of the monster to
  * that cycle, it stores those decisions into a map so that they can be sorted.
- * It then chooses the location that is the farthest distance away from the 
+ * It then chooses the location that is the farthest distance away from the
  * monster without getting caught. If it is not possible to reach a cycle
  * before the monster can, then the player simply calculates the shortest
  * path to the cycle, hoping that the monster is not intelligent enough
@@ -518,7 +518,7 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
         i = (*vectIt)->i();
         j = (*vectIt)->j();
 
-      
+
         if (distPlayer[i][j] < distMonster[i][j] )
         {
 
@@ -529,7 +529,7 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
 
     }
 
-    
+
 
     if (decisions.size() != 0)
     {
@@ -560,7 +560,7 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
             nextMove = decIt->second;
         }
 
-       
+
         nextMove = calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
 
 
@@ -690,7 +690,7 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
 
         roomCycle = removeSitesWithOneAdjacentSite(roomCycle);
 
-   }
+    }
 
     return chooseNextRoom(distMonster, distPlayer, prevPlayer, roomCycle, player);
 
@@ -737,7 +737,7 @@ vector<Site*> Player::getCorrectCycle(multimap<int, vector<Site*>> vectorSizes, 
 
             if (distPlayer[i][j] < distMonster[i][j])
             {
-               
+
                 return it->second;
             }
 
@@ -812,15 +812,15 @@ multimap<Site*, vector<Site*>> Player::findAllRoomCycles(map<Site*, vector<Site*
     multiIt = cycle.begin();
     while (multiIt != cycle.end())
     {
-       
-       
+
+
         vectIt = multiIt->second.begin();
         while (vectIt != multiIt->second.end())
         {
-            
+
             vectIt++;
         }
-       
+
         multiIt++;
     }
 
@@ -898,7 +898,7 @@ vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
         {
             if ((*trav)->i() == (*vectIt)->i() && (*trav)->j() == (*vectIt)->j())
             {
-                
+
                 erase = trav;
                 ++trav;
                 roomCycle.erase(erase);
@@ -914,7 +914,7 @@ vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
     vectIt = roomCycle.begin();
     while (vectIt != roomCycle.end())
     {
-    
+
         vectIt++;
     }
 
@@ -1063,7 +1063,7 @@ Site* Player::calculateFinalDestination(Site* nextMove, int**&distPlayer, Site* 
  *   Stores these, then takes the path to the site which is the farthest away from
  *   the monster.
  *
- * @param[in, out] distMonster - Contains all of the shortest distances from the 
+ * @param[in, out] distMonster - Contains all of the shortest distances from the
  * monster to any site on the playfield.
  * @param[in, out] distPlayer - Contains all of the shortest distances from the
  * player to any site on the playfield.
@@ -1116,7 +1116,7 @@ Site* Player::stayAliveAsLongAsPossible(int **&distMonster, int **&distPlayer)
  * to any site on the playfield.
  * @param[in, out] distPlayer - The shortest distance from the player
  * to any site on the playfield.
- * @param[in, out] prevPlayer - The locations obtained from b.f.s. done on 
+ * @param[in, out] prevPlayer - The locations obtained from b.f.s. done on
  * the player.
  * @param[in] player - The site which the player is currently on.
  * @param[in] monster - The site which the monster is currently on.
@@ -1143,7 +1143,7 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
     inCycle = isPlayerInConnectedRoomCycle(cycleBetweenRooms, player);
 
-   
+
 
 
     if (playfield->isCorridor(player))
@@ -1350,7 +1350,7 @@ bool Player::isPlayerInConnectedRoomCycle(map<Site*, vector<Site*>> cycleBetween
  *
  * @par Description
  *  This function tries to make the best decision it can when the player is
- * on a connected component. For example, it has to make sure it does not 
+ * on a connected component. For example, it has to make sure it does not
  * turn around when the monster is chasing right behind it, and it has to make
  * sure that it chooses a path that has a way out (no dead ends). Therefore,
  * in summary, this function chooses the best path it can when the player is located
@@ -1391,7 +1391,7 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
     it = cycleBetweenRooms.begin();
     while (it != cycleBetweenRooms.end())
     {
-  
+
         //Make sure the representative of the cycle is included in the list of
         // vertices.
         it->second.push_back(it->first);
@@ -1401,7 +1401,7 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
         vectIt = it->second.begin();
         while (vectIt != it->second.end())
         {
-          
+
             if (i == (*vectIt)->i() && j == (*vectIt)->j())
                 adjList = findAdjLists(it->second);
 
@@ -1522,7 +1522,7 @@ Site* Player::scanAdjacentCorridorSites(const Site* player, int **&distMonster)
     i = player->i();
     j = player->j();
 
-    
+
 
     longestDist = distMonster[i][j];
 
@@ -1562,7 +1562,7 @@ Site* Player::scanAdjacentCorridorSites(const Site* player, int **&distMonster)
         }
     }
 
-   
+
 
 
 
@@ -1621,7 +1621,7 @@ vector<Site*> Player::getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRoom
     searchAllAdjCorrSites(corridors, site, i, j);
     checkDuplicates(corridors, site);
 
-  
+
 
 
     // Delete any corridors that are not in the cycle between rooms and corridors.
@@ -1973,7 +1973,7 @@ void Player::freeMarkedArray(bool **&marked)
  *
  *
  * @par Description
- *  This function finds cycles between ONLY corridor sites. It looks at all of 
+ *  This function finds cycles between ONLY corridor sites. It looks at all of
  * the connected components, and removes any and all vertices which are not
  * a part of the cycle.
  *
@@ -2029,18 +2029,18 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
     connectedComponents = 0;
     while (it != cycle.end())
     {
-        
-        
+
+
         vectIt = it->second.begin();
         connectedComponents++;
         if (it->second.empty())
             empty++;
         while (vectIt != it->second.end())
         {
-           
+
             vectIt++;
         }
-        
+
         it++;
     }
 
@@ -2098,7 +2098,7 @@ vector<Site*> Player::removeSitesWithOneAdjacentSite(vector<Site*> myvector)
                     vectIt++;
                 }
 
-                
+
                 erase = vectIt;
                 ++vectIt;
                 myvector.erase(erase);
@@ -2128,7 +2128,7 @@ vector<Site*> Player::removeSitesWithOneAdjacentSite(vector<Site*> myvector)
     vectIt = myvector.begin();
     while (vectIt != myvector.end())
     {
-        
+
         vectIt++;
     }
 
@@ -2365,7 +2365,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 
     if (adjDisc.size() == 0)
     {
-        
+
         return nullptr;
     }
 
@@ -2548,7 +2548,7 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
 
             while (myVertices != vertices.end())
             {
-               
+
                 myVertices++;
             }
 
@@ -3206,7 +3206,7 @@ bool Player::doCorridorsExist()
  * the playfield.
  * @param[in, out] distPlayer - The distance from the player to any site on
  * the playfield.
- * @param[in, out] prevPlayer - The paths from the player to any site on 
+ * @param[in, out] prevPlayer - The paths from the player to any site on
  * the playfield.
  * @param[in] player - The site the player is currently on.
  * @param[in] monster - The site the monster is currently on.
@@ -3233,6 +3233,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
     bool corridorCycle = false;
 
 
+    // Determine if a room cycle exists.
     if (connectedComponents.empty())
     {
         findCorridors(corridors);
@@ -3282,11 +3283,11 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
         return nullptr;
 
 
+    // If room cycle does not exist, determine if player is in cycle.
 
-    // Determine if the player is on a site in the cycle.
     inCycle = isPlayerInCorridorCycle(connectedCycle, player);
 
-    
+
 
     if (!inCycle)
     {
@@ -3316,6 +3317,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
                 it++;
             }
 
+            // Choose the safest farthes move away from the monster.
             if (!decisions.empty())
             {
                 decIt = decisions.end();
@@ -3324,6 +3326,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
 
             }
 
+            // Look for any site the player can actually reach.
             else if (decisions.empty())
             {
 
@@ -3349,6 +3352,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
 
             else
             {
+                // Calculate the shortest path to a cycle.
                 it = connectedCycle.begin();
                 while (it != connectedCycle.end())
                 {
@@ -3727,7 +3731,7 @@ void Player::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **dis
  * @par Description
  *  A helper function for the bfs. Used to store room sites that are NE, NW, SE, SW.
  * Calculates previous sites and distances using breadth first search.
- * 
+ *
  *
  * @param[in, out]  marked - A 2D array containing bools. Marked true if the player can
  * reach a specific location.

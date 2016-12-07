@@ -4,7 +4,7 @@
  * @brief Contains all of the functions for the class monster.
  *
  * @par Description
- *    This file contains all of the functions the monster uses to 
+ *    This file contains all of the functions the monster uses to
  * analyze the graph and chase the player down.
  *
  * @author Cameron Javaheri
@@ -34,10 +34,10 @@
  * @param[in] p - The playfield.
  *
  ******************************************************************************/
-Monster::Monster(Playfield* p) 
+Monster::Monster(Playfield* p)
 {
-   playfield = p;
-   N       = playfield->size();
+    playfield = p;
+    N       = playfield->size();
 }
 
 
@@ -53,44 +53,44 @@ Monster::Monster(Playfield* p)
  * @return An adjacent square to the monster which is a legal move.
  *
  ******************************************************************************/
-const Site* Monster::move() 
+const Site* Monster::move()
 {
-   bool **marked = nullptr;
-   Site* **prev = nullptr;
-   int ** dist = nullptr;
-   const Site* monster   = playfield->getMonsterSite();
-   const Site* player = playfield->getPlayerSite();
-   Site* nextMove;
-   const Site* tryMove;
-   vector<Site*> allocatedMemory;
+    bool **marked = nullptr;
+    Site* **prev = nullptr;
+    int ** dist = nullptr;
+    const Site* monster   = playfield->getMonsterSite();
+    const Site* player = playfield->getPlayerSite();
+    Site* nextMove;
+    const Site* tryMove;
+    vector<Site*> allocatedMemory;
 
-	// Create the 2D arrays needed for bfs.
-	allocateStorage(marked, prev, dist);
+    // Create the 2D arrays needed for bfs.
+    allocateStorage(marked, prev, dist);
 
-	// Perform a breadth-first-search on the playfield.
-	bfs(marked, prev, dist, monster, allocatedMemory);
+    // Perform a breadth-first-search on the playfield.
+    bfs(marked, prev, dist, monster, allocatedMemory);
 
-	// Check to make sure a path exists to the player.
-	if (!marked[player->i()][player->j()])
-	{
-		deallocateStorage(marked, prev, dist, allocatedMemory);
-		return monster;
-	}
+    // Check to make sure a path exists to the player.
+    if (!marked[player->i()][player->j()])
+    {
+        deallocateStorage(marked, prev, dist, allocatedMemory);
+        return monster;
+    }
 
-	// Calculate the next move on the shortest path the monster needs to take.
-	nextMove = getNextMove(marked, prev, dist, monster, player, allocatedMemory);
+    // Calculate the next move on the shortest path the monster needs to take.
+    nextMove = getNextMove(marked, prev, dist, monster, player, allocatedMemory);
 
-	// Create the pointer to the next move.
-	tryMove = new Site(nextMove->i(), nextMove->j());
+    // Create the pointer to the next move.
+    tryMove = new Site(nextMove->i(), nextMove->j());
 
-	// Free up any allocated memory used.
-	deallocateStorage(marked, prev, dist, allocatedMemory);
+    // Free up any allocated memory used.
+    deallocateStorage(marked, prev, dist, allocatedMemory);
 
-	//Make sure the move is legal.
-	if (playfield->isLegalMove(monster, tryMove))
-		return tryMove;
+    //Make sure the move is legal.
+    if (playfield->isLegalMove(monster, tryMove))
+        return tryMove;
 
-	return nullptr;
+    return nullptr;
 
 
 }
@@ -113,37 +113,37 @@ const Site* Monster::move()
  ******************************************************************************/
 
 
- Site* Monster::getNextMove(bool **&marked, Site* **&prev, int **&dist, const Site* monster, const Site* player, vector<Site*> &allocatedMemory)
+Site* Monster::getNextMove(bool **&marked, Site* **&prev, int **&dist, const Site* monster, const Site* player, vector<Site*> &allocatedMemory)
 {
-	unsigned int i;
-	unsigned int j;
-	Site* nextMove = nullptr;
+    unsigned int i;
+    unsigned int j;
+    Site* nextMove = nullptr;
 
-	i = player->i();
-	j = player->j();
+    i = player->i();
+    j = player->j();
 
-	// Starting distance is not 1
-	if (dist[i][j] != 1)
-	{
+    // Starting distance is not 1
+    if (dist[i][j] != 1)
+    {
 
-		while (dist[i][j] != 1)
-		{
-			nextMove = prev[i][j];
-			i = nextMove->i();
-			j = nextMove->j();
-		}
-		return nextMove;
+        while (dist[i][j] != 1)
+        {
+            nextMove = prev[i][j];
+            i = nextMove->i();
+            j = nextMove->j();
+        }
+        return nextMove;
 
-	}
+    }
 
-	// Starting distance is 1 ; therefore, the monster only has to take
-	// one more move to reach the player.
-	else
-	{
-		nextMove = new Site(player->i(), player->j());
-		allocatedMemory.push_back(nextMove);
-		return nextMove;
-	}
+    // Starting distance is 1 ; therefore, the monster only has to take
+    // one more move to reach the player.
+    else
+    {
+        nextMove = new Site(player->i(), player->j());
+        allocatedMemory.push_back(nextMove);
+        return nextMove;
+    }
 
 
 }
@@ -167,36 +167,36 @@ const Site* Monster::move()
 
 void Monster::bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monster, vector<Site*> &allocatedMemory)
 {
-	queue< Site*> myqueue;
-	bool isRoom;
-	Site* monsterSite = new Site(monster->i(), monster->j());
-	Site* temp;
+    queue< Site*> myqueue;
+    bool isRoom;
+    Site* monsterSite = new Site(monster->i(), monster->j());
+    Site* temp;
 
-	// Mark the initial site(monster's site) as visited.
-	marked[monster->i()][monster->j()] = true;
-	dist[monster->i()][monster->j()] = 0;
-	prev[monster->i()][monster->j()] = monsterSite;
-	myqueue.push(monsterSite);
+    // Mark the initial site(monster's site) as visited.
+    marked[monster->i()][monster->j()] = true;
+    dist[monster->i()][monster->j()] = 0;
+    prev[monster->i()][monster->j()] = monsterSite;
+    myqueue.push(monsterSite);
 
-	// While the queue is not empty, visit all adjacent vertices.
-	while (!myqueue.empty())
-	{
-		temp = myqueue.front();
-		myqueue.pop();
-		isRoom = playfield->isRoom(temp);
-		// Check all 8 adjacent vertices to temp.
-		if (isRoom)
-			checkAdjacentRoomSquares(marked, prev, dist, myqueue, temp, allocatedMemory);
+    // While the queue is not empty, visit all adjacent vertices.
+    while (!myqueue.empty())
+    {
+        temp = myqueue.front();
+        myqueue.pop();
+        isRoom = playfield->isRoom(temp);
+        // Check all 8 adjacent vertices to temp.
+        if (isRoom)
+            checkAdjacentRoomSquares(marked, prev, dist, myqueue, temp, allocatedMemory);
 
 
-		// Temp must be a corridor site, so check all 4 adjacent vertices.
-		else
-			checkAdjacentCorridorSquares(marked, prev, dist, myqueue, temp, allocatedMemory);
+        // Temp must be a corridor site, so check all 4 adjacent vertices.
+        else
+            checkAdjacentCorridorSquares(marked, prev, dist, myqueue, temp, allocatedMemory);
 
-	}
+    }
 
-	// Store monsterSite in order to free the memory later.
-	allocatedMemory.push_back(monsterSite);
+    // Store monsterSite in order to free the memory later.
+    allocatedMemory.push_back(monsterSite);
 
 }
 
@@ -221,83 +221,83 @@ void Monster::bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monste
 
 void Monster::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **dist, queue<Site*> &myqueue, Site* temp, vector<Site*> &allocatedMemory)
 {
-			int i;
-			int j;
-			Site* addSite = nullptr;
-			i = temp->i();
-			j = temp->j();
+    int i;
+    int j;
+    Site* addSite = nullptr;
+    i = temp->i();
+    j = temp->j();
 
-			// Check all 4 horizontal and vertical sites.
-			// First, check upper vertical site.
-			if (!playfield->isWall(i - 1, j))
-			{
-				if (playfield->isRoom(i - 1, j) || playfield->isCorridor(i - 1, j))
-				{
-					if (!marked[i - 1][j])
-					{
-						marked[i - 1][j] = true;
-						dist[i - 1][j] = dist[i][j] + 1;
-						prev[i - 1][j] = temp;
-						addSite = new Site(i - 1, j);
-						allocatedMemory.push_back(addSite);
-						myqueue.push(addSite);
-					}
-				}
-			}
-
-
-			//Next, check lower vertical site.
-			if (!playfield->isWall(i + 1, j))
-			{
-				if (playfield->isRoom(i + 1, j) || playfield->isCorridor(i + 1, j))
-				{
-					if (!marked[i + 1][j])
-					{
-						marked[i + 1][j] = true;
-						dist[i + 1][j] = dist[i][j] + 1;
-						prev[i + 1][j] = temp;
-						addSite = new Site(i + 1, j);
-						allocatedMemory.push_back(addSite);
-						myqueue.push(addSite);
-					}
-				}
-			}
+    // Check all 4 horizontal and vertical sites.
+    // First, check upper vertical site.
+    if (!playfield->isWall(i - 1, j))
+    {
+        if (playfield->isRoom(i - 1, j) || playfield->isCorridor(i - 1, j))
+        {
+            if (!marked[i - 1][j])
+            {
+                marked[i - 1][j] = true;
+                dist[i - 1][j] = dist[i][j] + 1;
+                prev[i - 1][j] = temp;
+                addSite = new Site(i - 1, j);
+                allocatedMemory.push_back(addSite);
+                myqueue.push(addSite);
+            }
+        }
+    }
 
 
-			// Next, check the right horizontal site.
-			if (!playfield->isWall(i, j + 1))
-			{
-				if (playfield->isRoom(i, j + 1) || playfield->isCorridor(i, j + 1))
-				{
-					if (!marked[i][j + 1])
-					{
-						marked[i][j + 1] = true;
-						dist[i][j + 1] = dist[i][j] + 1;
-						prev[i][j + 1] = temp;
-						addSite = new Site(i, j + 1);
-						allocatedMemory.push_back(addSite);
-						myqueue.push(addSite);
-					}
-				}
-			}
+    //Next, check lower vertical site.
+    if (!playfield->isWall(i + 1, j))
+    {
+        if (playfield->isRoom(i + 1, j) || playfield->isCorridor(i + 1, j))
+        {
+            if (!marked[i + 1][j])
+            {
+                marked[i + 1][j] = true;
+                dist[i + 1][j] = dist[i][j] + 1;
+                prev[i + 1][j] = temp;
+                addSite = new Site(i + 1, j);
+                allocatedMemory.push_back(addSite);
+                myqueue.push(addSite);
+            }
+        }
+    }
 
 
-			//Finally, check the left horizontal site.
-			if (!playfield->isWall(i, j - 1))
-			{
-				if (playfield->isRoom(i, j - 1) || playfield->isCorridor(i, j - 1))
-				{
-					if (!marked[i][j - 1])
-					{
-						marked[i][j - 1] = true;
-						dist[i][j - 1] = dist[i][j] + 1;
-						prev[i][j - 1] = temp;
-						addSite = new Site(i, j - 1);
-						allocatedMemory.push_back(addSite);
-						myqueue.push(addSite);
-					}
-				}
-			}
+    // Next, check the right horizontal site.
+    if (!playfield->isWall(i, j + 1))
+    {
+        if (playfield->isRoom(i, j + 1) || playfield->isCorridor(i, j + 1))
+        {
+            if (!marked[i][j + 1])
+            {
+                marked[i][j + 1] = true;
+                dist[i][j + 1] = dist[i][j] + 1;
+                prev[i][j + 1] = temp;
+                addSite = new Site(i, j + 1);
+                allocatedMemory.push_back(addSite);
+                myqueue.push(addSite);
+            }
+        }
+    }
+
+
+    //Finally, check the left horizontal site.
+    if (!playfield->isWall(i, j - 1))
+    {
+        if (playfield->isRoom(i, j - 1) || playfield->isCorridor(i, j - 1))
+        {
+            if (!marked[i][j - 1])
+            {
+                marked[i][j - 1] = true;
+                dist[i][j - 1] = dist[i][j] + 1;
+                prev[i][j - 1] = temp;
+                addSite = new Site(i, j - 1);
+                allocatedMemory.push_back(addSite);
+                myqueue.push(addSite);
+            }
+        }
+    }
 
 }
 
@@ -309,7 +309,7 @@ void Monster::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **di
  * @par Description
  *  A helper function for the bfs. Used to store room sites that are NE, NW, SE, SW.
  * Calculates previous sites and distances using breadth first search.
- * 
+ *
  *
  * @param[in, out]  marked - A 2D array containing bools. Marked true if the player can
  * reach a specific location.
@@ -325,87 +325,87 @@ void Monster::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **di
 void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, queue<Site*> &myqueue, Site* temp, vector<Site*> &allocatedMemory)
 {
 
-			Site* addSite = nullptr;
-			int i;
-			int j;
-			i = temp->i();
-			j = temp->j();
+    Site* addSite = nullptr;
+    int i;
+    int j;
+    i = temp->i();
+    j = temp->j();
 
-			// Check all 4 diagonal sites.
-			// First check lower right diagonal
-			if (!playfield->isWall(i + 1, j + 1))
-			{
-				if (playfield->isRoom(i + 1, j + 1))
-				{
-					if (!marked[i + 1][j + 1])
-					{
-						marked[i + 1][j + 1] = true;
-						dist[i + 1][j + 1] = dist[i][j] + 1;
-						prev[i + 1][j + 1] = temp;
-						addSite = new Site(i + 1, j + 1);
-						allocatedMemory.push_back(addSite);
-						myqueue.push(addSite);
-					}
-				}
-			}
-
-
-			// Next check lower left diagonal
-			if (!playfield->isWall(i + 1, j - 1))
-			{
-				if (playfield->isRoom(i + 1, j - 1))
-				{
-					if (!marked[i + 1][j - 1])
-					{
-						marked[i + 1][j - 1] = true;
-						dist[i + 1][j - 1] = dist[i][j] + 1;
-						prev[i + 1][j - 1] = temp;
-						addSite = new Site (i + 1, j - 1);
-						allocatedMemory.push_back(addSite);
-						myqueue.push(addSite);
-					}
-				}
-			}
+    // Check all 4 diagonal sites.
+    // First check lower right diagonal
+    if (!playfield->isWall(i + 1, j + 1))
+    {
+        if (playfield->isRoom(i + 1, j + 1))
+        {
+            if (!marked[i + 1][j + 1])
+            {
+                marked[i + 1][j + 1] = true;
+                dist[i + 1][j + 1] = dist[i][j] + 1;
+                prev[i + 1][j + 1] = temp;
+                addSite = new Site(i + 1, j + 1);
+                allocatedMemory.push_back(addSite);
+                myqueue.push(addSite);
+            }
+        }
+    }
 
 
-			// Next check upper right diagonal
-			if (!playfield->isWall(i - 1, j + 1))
-			{
-				if (playfield->isRoom(i - 1, j + 1))
-				{
-					if (!marked[i - 1][j + 1])
-					{
-						marked[i - 1][j + 1] = true;
-						dist[i - 1][j + 1] = dist[i][j] + 1;
-						prev[i - 1][j + 1] = temp;
-						addSite = new Site(i - 1, j + 1);
-						allocatedMemory.push_back(addSite);
-						myqueue.push(addSite);
-					}
-				}
-			}
+    // Next check lower left diagonal
+    if (!playfield->isWall(i + 1, j - 1))
+    {
+        if (playfield->isRoom(i + 1, j - 1))
+        {
+            if (!marked[i + 1][j - 1])
+            {
+                marked[i + 1][j - 1] = true;
+                dist[i + 1][j - 1] = dist[i][j] + 1;
+                prev[i + 1][j - 1] = temp;
+                addSite = new Site (i + 1, j - 1);
+                allocatedMemory.push_back(addSite);
+                myqueue.push(addSite);
+            }
+        }
+    }
+
+
+    // Next check upper right diagonal
+    if (!playfield->isWall(i - 1, j + 1))
+    {
+        if (playfield->isRoom(i - 1, j + 1))
+        {
+            if (!marked[i - 1][j + 1])
+            {
+                marked[i - 1][j + 1] = true;
+                dist[i - 1][j + 1] = dist[i][j] + 1;
+                prev[i - 1][j + 1] = temp;
+                addSite = new Site(i - 1, j + 1);
+                allocatedMemory.push_back(addSite);
+                myqueue.push(addSite);
+            }
+        }
+    }
 
 
 
-			// Finally check upper left diagonal
-			if (!playfield->isWall(i - 1, j - 1))
-			{
-				if (playfield->isRoom(i - 1, j - 1))
-				{
-					if (!marked[i - 1][j - 1])
-					{
-						marked[i - 1][j - 1] = true;
-						dist[i - 1][j - 1] = dist[i][j] + 1;
-						prev[i - 1][j - 1] = temp;
-						addSite = new Site(i - 1, j - 1);
-						allocatedMemory.push_back(addSite);
-						myqueue.push(addSite);
-					}
-				}
-			}
+    // Finally check upper left diagonal
+    if (!playfield->isWall(i - 1, j - 1))
+    {
+        if (playfield->isRoom(i - 1, j - 1))
+        {
+            if (!marked[i - 1][j - 1])
+            {
+                marked[i - 1][j - 1] = true;
+                dist[i - 1][j - 1] = dist[i][j] + 1;
+                prev[i - 1][j - 1] = temp;
+                addSite = new Site(i - 1, j - 1);
+                allocatedMemory.push_back(addSite);
+                myqueue.push(addSite);
+            }
+        }
+    }
 
-			// Now check the horizontal and vertical sites.
-			checkAdjacentCorridorSquares(marked, prev, dist, myqueue, temp, allocatedMemory);
+    // Now check the horizontal and vertical sites.
+    checkAdjacentCorridorSquares(marked, prev, dist, myqueue, temp, allocatedMemory);
 
 }
 
@@ -419,7 +419,7 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
  *
  * @param[in, out] marked - An array to mark visited vertices.
  * @param[in, out] prev - An array to store the paths to different vertices.
- * @param[in, out] dist - An array that stores shortest distances to 
+ * @param[in, out] dist - An array that stores shortest distances to
  * different vertices.
  * @param[in, out] allocatedMemory - A vector containing any memory that was
  * allocated during the program.
@@ -428,32 +428,32 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
 
 void Monster::deallocateStorage(bool **&marked, Site* **&prev, int **&dist, vector<Site*> &allocatedMemory)
 {
-	int i;
-	vector<Site*>::iterator it;
+    int i;
+    vector<Site*>::iterator it;
 
-	// Free all of the 2D arrays.
-	for (i = 0; i < N; i++)
-		delete[] marked[i];
+    // Free all of the 2D arrays.
+    for (i = 0; i < N; i++)
+        delete[] marked[i];
 
-	delete[] marked;
+    delete[] marked;
 
-	for (i = 0; i < N; i++)
-		delete[] prev[i];
+    for (i = 0; i < N; i++)
+        delete[] prev[i];
 
-	delete[] prev;
+    delete[] prev;
 
-	for (i = 0; i < N; i++)
-		delete[] dist[i];
+    for (i = 0; i < N; i++)
+        delete[] dist[i];
 
-	delete[] dist;
+    delete[] dist;
 
-	// Free all allocated site pointers.
-	it = allocatedMemory.begin();
-	while (it != allocatedMemory.end())
-	{
-		delete (*it);
-		it++;
-	}
+    // Free all allocated site pointers.
+    it = allocatedMemory.begin();
+    while (it != allocatedMemory.end())
+    {
+        delete (*it);
+        it++;
+    }
 
 }
 
@@ -473,28 +473,28 @@ void Monster::deallocateStorage(bool **&marked, Site* **&prev, int **&dist, vect
 
 void Monster::allocateStorage(bool **&marked, Site* **&prev, int **&dist)
 {
-	int i;
-	int j;
+    int i;
+    int j;
 
-	// Create a 2D array of distances between monster and other vertices.
-	dist = new (nothrow) int *[N];
-	for (i = 0; i < N; i++)
-		dist[i] = new (nothrow) int [N];
+    // Create a 2D array of distances between monster and other vertices.
+    dist = new (nothrow) int *[N];
+    for (i = 0; i < N; i++)
+        dist[i] = new (nothrow) int [N];
 
-	// Create a 2D array of previous site pointers.
-	prev = new (nothrow) Site* *[N];
-	for (i = 0; i < N; i++)
-		prev[i] = new (nothrow) Site* [N];
+    // Create a 2D array of previous site pointers.
+    prev = new (nothrow) Site* *[N];
+    for (i = 0; i < N; i++)
+        prev[i] = new (nothrow) Site* [N];
 
-	// Create a 2D array of bools to mark visited vertices.
-	marked = new (nothrow) bool *[N];
-	for (i = 0; i < N; i++)
-		marked[i] = new (nothrow) bool [N];
+    // Create a 2D array of bools to mark visited vertices.
+    marked = new (nothrow) bool *[N];
+    for (i = 0; i < N; i++)
+        marked[i] = new (nothrow) bool [N];
 
-	// Initialize them all as false.
-	for (i = 0; i < N; i++)
-		for (j = 0; j < N; j++)
-			marked[i][j] = false;
+    // Initialize them all as false.
+    for (i = 0; i < N; i++)
+        for (j = 0; j < N; j++)
+            marked[i][j] = false;
 
 
 }
