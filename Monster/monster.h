@@ -8,7 +8,7 @@
 
 
 /***************************************************************************//**
- * @class Player
+ * @class Monster
  *
  * @brief A class used to create a monster.
  *
@@ -21,7 +21,6 @@ class Monster
  
     public:
        Monster(Playfield* play);
-	~Monster();
        const Site* move();
        void bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monster, vector<Site*> &allocatedMemory);
        void allocateStorage(bool **&marked, Site* **&prev, int **&dist);

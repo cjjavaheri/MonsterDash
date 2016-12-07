@@ -68,6 +68,8 @@ using namespace std;
  * @par Description
  *  This function is a constructor for a player object. It initializes the
  * playfield as well as the size of the playfield.
+ * 
+ * @param[in] p - The playfield.
  *
  ******************************************************************************/
 
@@ -93,8 +95,7 @@ Player::Player(Playfield* p)
 
 const Site* Player::move()
 {
-    // TAKE A RANDOM LEGAL MOVE
-    // YOUR MAIN TASK IS TO RE-IMPLEMENT THIS METHOD TO DO SOMETHING INTELLIGENT
+    
     const Site* player   = playfield->getPlayerSite();
     const Site* monster = playfield->getMonsterSite();
     vector<Site*> corridors;

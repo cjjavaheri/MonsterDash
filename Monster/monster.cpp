@@ -1,18 +1,36 @@
 #include "monster.h"
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function initializes a monster object. It initializes the size
+ * of the playfield, as well as the playfield itself.
+ *
+ * @param[in] p - The playfield.
+ *
+ ******************************************************************************/
 Monster::Monster(Playfield* p) 
 {
    playfield = p;
    N       = playfield->size();
 }
 
-Monster::~Monster()
-{
 
-}
 
-// TAKE A RANDOM LEGAL MOVE
-// YOUR MAIN TASK IS TO RE-IMPLEMENT THIS METHOD TO DO SOMETHING INTELLIGENT
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function mainly calls all of the functions required to calculate
+ * the shortest path to the player.
+ *
+ * @return An adjacent square to the monster which is a legal move.
+ *
+ ******************************************************************************/
 const Site* Monster::move() 
 {
    bool **marked = nullptr;
@@ -58,6 +76,22 @@ const Site* Monster::move()
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function calculates the next move for the monster.
+ *
+ * @param[in, out] marked - A 2D array of bools used to mark the playfield.
+ * @param[in, out] prev - A 2D array to store the path.
+ * @param[in, out] dist - The 2D array used to keep track of distances
+ * to certain sites on the playfield.
+ * @param[in] monster - The site the monster is currently located on.
+ * @param[in] player - The site the player is currently located on.
+ * @param[in, out] allocatedMemory - Any memory allocated is stored in this vector.
+ *
+ ******************************************************************************/
 
 
  Site* Monster::getNextMove(bool **&marked, Site* **&prev, int **&dist, const Site* monster, const Site* player, vector<Site*> &allocatedMemory)
@@ -96,6 +130,22 @@ const Site* Monster::move()
 }
 
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function performs a breadth first on the monster.
+ *
+ * @param[in, out] marked - A 2D array of bools used to mark the playfield.
+ * @param[in, out] prev - A 2D array to store the path.
+ * @param[in, out] dist - The 2D array used to keep track of distances
+ * to certain sites on the playfield.
+ * @param[in] monster - The site the monster is currently located on.
+ * @param[in, out] allocatedMemory - Any memory allocated is stored in this vector.
+ *
+ ******************************************************************************/
+
 void Monster::bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monster, vector<Site*> &allocatedMemory)
 {
 	queue< Site*> myqueue;
@@ -130,6 +180,25 @@ void Monster::bfs(bool **&marked, Site* **&prev, int **&dist, const Site* monste
 	allocatedMemory.push_back(monsterSite);
 
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  A helper function for the bfs. Used to store sites that are N, S, E, or W.
+ * Calculates previous sites and distances using breadth first search.
+ *
+ * @param[in, out]  marked - A 2D array containing bools. Marked true if the monster can
+ * reach a specific location.
+ * @param[in, out]  prev - Stores the path to any site on the playfield.
+ * @param[in, out]  dist - The shortest distances to a particular site on the playfield.
+ * @param[in, out]  myqueue - A queue used for breadth first search.
+ * @param[in] temp - The site that the breadth first search is currently examining.
+ * @param[in, out] allocatedMemory - The vector used to store any memory that was
+ * allocated.
+ *
+ ******************************************************************************/
 
 void Monster::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **dist, queue<Site*> &myqueue, Site* temp, vector<Site*> &allocatedMemory)
 {
@@ -212,6 +281,27 @@ void Monster::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **di
 			}
 
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  A helper function for the bfs. Used to store room sites that are NE, NW, SE, SW.
+ * Calculates previous sites and distances using breadth first search.
+ * 
+ *
+ * @param[in, out]  marked - A 2D array containing bools. Marked true if the player can
+ * reach a specific location.
+ * @param[in, out]  prev - Stores the path to any site on the playfield.
+ * @param[in, out]  dist - The shortest distances to a particular site on the playfield.
+ * @param[in, out]  myqueue - A queue used for breadth first search.
+ * @param[in] temp -  The site that the breadth first search is currently examining.
+ * @param[in, out] allocatedMemory - The vector used to store any memory that was
+ * allocated.
+ *
+ ******************************************************************************/
 
 void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, queue<Site*> &myqueue, Site* temp, vector<Site*> &allocatedMemory)
 {
@@ -300,6 +390,23 @@ void Monster::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, 
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  A function used to deallocate memory used during the program.
+ *
+ * @param[in, out] marked - An array to mark visited vertices.
+ * @param[in, out] prev - An array to store the paths to different vertices.
+ * @param[in, out] dist - An array that stores shortest distances to 
+ * different vertices.
+ * @param[in, out] allocatedMemory - A vector containing any memory that was
+ * allocated during the program.
+ *
+ ******************************************************************************/
+
 void Monster::deallocateStorage(bool **&marked, Site* **&prev, int **&dist, vector<Site*> &allocatedMemory)
 {
 	int i;
@@ -330,6 +437,20 @@ void Monster::deallocateStorage(bool **&marked, Site* **&prev, int **&dist, vect
 	}
 
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  A function used to allocate memory for breadth first search.
+ *
+ * @param[in, out]  marked - A 2D array containing bools. Marked true if the monster can
+ * reach a specific location.
+ * @param[in, out]  prev - Stores the path to any site on the playfield.
+ * @param[in, out]  dist - The shortest distances to a particular site on the playfield.
+ *
+ ******************************************************************************/
 
 void Monster::allocateStorage(bool **&marked, Site* **&prev, int **&dist)
 {
