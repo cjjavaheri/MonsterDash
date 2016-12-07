@@ -1,3 +1,25 @@
+/**************************************************************************//**
+ * @file monster.cpp
+ *
+ * @brief Contains all of the functions for the class monster.
+ *
+ * @par Description
+ *    This file contains all of the functions the monster uses to 
+ * analyze the graph and chase the player down.
+ *
+ * @author Cameron Javaheri
+ *
+ * @par Class:
+ *    CSC300 Data Structures
+ *
+ * @date Fall 2015
+ *
+ *
+ *****************************************************************************/
+
+
+
+
 #include "monster.h"
 
 
@@ -41,9 +63,6 @@ const Site* Monster::move()
    Site* nextMove;
    const Site* tryMove;
    vector<Site*> allocatedMemory;
-   cout << "Monster[i][j] " << monster->i() << " " << monster->j() << endl;
-   cout << "PLayer[i][j] " << player->i() << " " << player->j() << endl;
-   cout << endl << endl;
 
 	// Create the 2D arrays needed for bfs.
 	allocateStorage(marked, prev, dist);
