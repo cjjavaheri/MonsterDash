@@ -488,6 +488,8 @@ map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
  *
  * @param[in, out] distMonster - A 2D array containing the shortest distances
  * to every site from the monster.
+ * @param[in, out] distPlayer - A 2D array containing the shortest distances to
+ * every site from the player.
  * @param[in, out] prevPlayer - The list of locations to a specific site obtained
  * from breadth first search.
  * @param[in] roomCycle - A cycle of ONLY room sites. NO corridors.
@@ -630,6 +632,8 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
  * determine the player's actual next move.
  *
  * @param[in, out] distMonster - The shortest distance from the monster to any site
+ * on the playfield.
+ * @param[in, out] distPlayer - The shortest distance from the player to any site
  * on the playfield.
  * @param[in, out] prevPlayer - A 2D array containing site pointers which were
  * obtained from breadth first search. Used to calculate final destination.
@@ -1672,8 +1676,8 @@ vector<Site*> Player::getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRoom
  * @param[in, out] vectDisc - A vector to store the the corridors adjacent
  * to the room.
  * @param[in] site - The site to start searching from.
- * @param[in, out] - The ith coordinate to start searching from.
- * @param[in, out] - The jth coordinate to start searching from.
+ * @param[in, out] i - The ith coordinate to start searching from.
+ * @param[in, out] j - The jth coordinate to start searching from.
  *
  ******************************************************************************/
 
@@ -3567,6 +3571,7 @@ bool Player::isPlayerInCorridorCycle(map<Site*, vector<Site*>> connectedCycle, c
  *  This function performs a breadth first on the player.
  *
  * @param[in, out] marked - A 2D array of bools used to mark the playfield.
+ * @param[in, out] prev - A 2D array to store the path.
  * @param[in, out] dist - The 2D array used to keep track of distances
  * to certain sites on the playfield.
  * @param[in] player - The site the player is currently located on.
@@ -3896,10 +3901,10 @@ void Player::deallocateStorage(bool **&markedMonster, Site* **&prevMonster, int 
  * @par Description
  *  A function used to allocate memory for breadth first search.
  *
- * @param[in, out] - marked - A 2D array containing bools. Marked true if the player can
+ * @param[in, out]  marked - A 2D array containing bools. Marked true if the player can
  * reach a specific location.
- * @param[in, out] - prev - Stores the path to any site on the playfield.
- * @param[in, out] - dist - The shortest distances to a particular site on the playfield.
+ * @param[in, out]  prev - Stores the path to any site on the playfield.
+ * @param[in, out]  dist - The shortest distances to a particular site on the playfield.
  *
  ******************************************************************************/
 
