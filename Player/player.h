@@ -116,6 +116,8 @@ class Player
 
 	vector<Site*> getCorrectCycle(multimap<int, vector<Site*>> vectorSizes, int **&distPlayer, int **&distMonster);
 
+	bool isPlayerInConnectedRoomCycle(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player);
+
 	
 
 };

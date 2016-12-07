@@ -827,6 +827,12 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
     unsigned int i;
     unsigned int j;
     int longestDist;
+    bool inCycle;
+
+	inCycle = isPlayerInConnectedRoomCycle(cycleBetweenRooms, player);
+
+	cout << "inConnRoomCycle: " << inCycle << endl;
+
 
     if (playfield->isCorridor(player))
     {
@@ -886,6 +892,32 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
     else
     {
+
+	nextMove = nullptr;
+	if (!inCycle)
+	{
+		it = cycleBetweenRooms.begin();
+		while (it != cycleBetweenRooms.end())
+		{
+			vectIt = it->second.begin();
+			while (vectIt != it->second.end())
+			{
+				i = (*vectIt)->i();
+				j = (*vectIt)->j();
+
+				if (distPlayer[i][j] < distMonster[i][j] && distPlayer[i][j] != 0)
+					nextMove = *vectIt;
+
+				vectIt++;
+			}
+
+			it++;
+		}
+
+	}
+
+	if (nextMove == nullptr)
+	{
         // Player must be on a corridor site.
         i = player->i();
         j = player->j();
@@ -941,10 +973,44 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
             // an adjacent room next to it.
             nextMove = chooseNextCorridor(cycleBetweenRooms, distPlayer, distMonster, player);
         }
+
+	}
     }
 
 
+
     return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
+}
+
+bool Player::isPlayerInConnectedRoomCycle(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player)
+{
+	map<Site*, vector<Site*>>::iterator it;
+	vector<Site*>::iterator vectIt;
+	unsigned int i;
+	unsigned int j;
+
+	it = cycleBetweenRooms.begin();
+	while (it != cycleBetweenRooms.end())
+	{
+		vectIt = it->second.begin();
+		while (vectIt != it->second.end())
+		{
+			i = (*vectIt)->i();
+			j = (*vectIt)->j();
+
+			if (i == player->i() && j == player->j())
+				return true;
+
+			vectIt++;
+		}
+
+		it++;
+	}
+
+
+
+	return false;
+
 }
 
 Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, int **&distPlayer,  int **&distMonster, const Site* player)
@@ -2535,7 +2601,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
                     i = (*vectIt)->i();
                     j = (*vectIt)->j();
 
-                    if (distPlayer[i][j] <= distMonster[i][j])
+                    if (distPlayer[i][j] < distMonster[i][j])
                         decisions.insert({distMonster[i][j], *vectIt});
 
                     vectIt++;
