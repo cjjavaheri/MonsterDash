@@ -1,3 +1,25 @@
+/**************************************************************************//**
+ * @file player.h
+ *
+ * @brief The header file for the player class.
+ *
+ * @par Description
+ *    This header file contains all of the functions which the player
+ *	uses to both analyze the underlying graph and, determine which
+ *	move it wants to make next.
+ *
+ * @author Cameron Javaheri
+ *
+ * @par Class:
+ *    CSC300 Data Structures
+ *
+ * @date Fall 2015
+ *
+ *
+ *****************************************************************************/
+
+
+
 #ifndef __PLAYER_H
 #define __PLAYER_H
 #include <stdlib.h>
@@ -8,6 +30,13 @@
 #include <queue>
 #include <vector>
 #include <stack>
+
+/***************************************************************************//**
+ * @class Player
+ *
+ * @brief A class used to create a player.
+ *
+ ******************************************************************************/
 
 class Player
 {

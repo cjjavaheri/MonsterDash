@@ -23,12 +23,12 @@
 		McLaury - 310
  *
  *
- * @details This paint program was created based on files originally
- * written by Dr. Paul Hinker and John M. Weiss, Ph.D.. We have now
- * combined those files and some of our own code to make a paint program
- * as a class assignment for CSC 300 with Dr. Paul Hinker. This paint
- * program allows the user to create, move, delete, and reorder several
- * different types of shapes and lines, in various colors.
+ * @details This program has 2 components to it. There is both a monster and a player.
+ * The monster's goal is simply to catch the player. The player's goal is to identify
+ * any cycles in the underlying graph so that the player can simply run around in circles
+ * forever, thereby evading the monster indefinitely. The game is over once the player is
+ * either caught, which in that case the monster wins, or the player survives a specified
+ * number of moves, in which case the player wins.
  * 
  *  @section compile_section Compiling and Usage
  *
@@ -49,7 +49,7 @@
  *
  * @par Modifications and Development Timeline:
    @verbatim
-   Gitlab Repository: https://gitlab.mcs.sdsmt.edu/7300226/csc300_fall2016_project1.git
+   Gitlab Repository: https://gitlab.mcs.sdsmt.edu/7346909/csc300_fall2016_project3.git
    @endverbatim
  *
  *
@@ -385,6 +385,19 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 }
 
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief Finds the adjacency list given a vector of corridors.
+ *
+ * @par Description
+ *   This function will find the adjacency list given a vector of corridors.
+ *
+ * @param[in] corridors - A vector containing corridors.
+ *
+ * @return A map containing each corridor and their adjacency list as a vector.
+ ******************************************************************************/
+
+
 map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
 {
     vector<Site*>::iterator it;
@@ -431,6 +444,33 @@ map<Site*, vector<Site*>> Player::findAdjLists(vector<Site*> corridors)
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief This function makes a decides the player's next move given a cycle
+ * of ONLY room sites.
+ *
+ * @par Description
+ *   The function decides what the best path to take is based upon knowing
+ * a cycle between room sites, the distance from the monster to that cycle, 
+ * and the distance from the player to that cycle. If the distance from the 
+ * the player to that cycle is smaller than the distance of the monster to
+ * that cycle, it stores those decisions into a map so that they can be sorted.
+ * It then chooses the location that is the farthest distance away from the 
+ * monster without getting caught. If it is not possible to reach a cycle
+ * before the monster can, then the player simply calculates the shortest
+ * path to the cycle, hoping that the monster is not intelligent enough
+ * to catch the player.
+ *
+ * @param[in, out] distMonster - A 2D array containing the shortest distances
+ * to every site from the monster.
+ * @param[in, out] prevPlayer - The list of locations to a specific site obtained
+ * from breadth first search.
+ * @param[in] roomCycle - A cycle of ONLY room sites. NO corridors.
+ * @param[in] player - The site the player is currently on.
+ *
+ * @return A site containing the player's next move.
+ ******************************************************************************/
 
 Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&prevPlayer, vector<Site*> roomCycle, const Site* player)
 {
@@ -551,6 +591,30 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
 }
 
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief This function calculates a cycle between ONLY room sites.
+ *
+ * @par Description
+ *   This function calculates a cycle between strictly room sites. To do this,
+ * it first stores all of the rooms in the playfield into a vector. It then removes
+ * any room sites which have an adjacent diagonal room site. It then finds the adjacency
+ * list for these room sites. Then it's able to determine all possible room cycles.
+ * Once given all possible room cycles, it chooses the cycle which has the largest
+ * number of vertices in the cycle, AND the player can reach before the monster.
+ * It finally removes dead ends before sending it off to another function to
+ * determine the player's actual next move.
+ *
+ * @param[in, out] distMonster - The shortest distance from the monster to any site
+ * on the playfield.
+ * @param[in, out] prevPlayer - A 2D array containing site pointers which were
+ * obtained from breadth first search. Used to calculate final destination.
+ * @param[in] player - The site the player is currently on.
+ *
+ * @return The player's next move.
+ ******************************************************************************/
+
+
 Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player)
 {
     static vector<Site*> roomCycle;
@@ -597,29 +661,32 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
 
         roomCycle = removeSitesWithOneAdjacentSite(roomCycle);
 
-
-        vectIt = roomCycle.begin();
-        adjConn.clear();
-        adjConn.insert({*vectIt, roomCycle});
-
-        it = adjConn.begin();
-        while (it != adjConn.end())
-        {
-            vectIt = it->second.begin();
-            while (vectIt != it->second.end())
-            {
-              
-                vectIt++;
-            }
-
-            it++;
-        }
-
-    }
+   }
 
     return chooseNextRoom(distMonster, distPlayer, prevPlayer, roomCycle, player);
 
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief Finds largest cycle between ONLY room sites.
+ *
+ * @par Description
+ *   This function looks at all possible cycles containing only room sites. It chooses
+ * the one which has the largest number of vertices AND the player can reach before
+ * the monster catches it. If this is not possible, it keeps looking at other cycles
+ * until it gets to the smallest cycle, in which case it just returns.
+ *
+ * @param[in] vectorSizes - A map containing the size of a cycle along with the
+ * cycle itself. Must be a multimap because some cycles may have the same number
+ * of duplicates.
+ * @param[in, out] distPlayer - The shortest distances from the player to any
+ * location on the playfield.
+ * @param[in, out] distMonster - The shortes distances from the monster to any location
+ * on the playfield.
+ *
+ * @return A vector containing a cycle between ONLY room sites.
+ ******************************************************************************/
 
 vector<Site*> Player::getCorrectCycle(multimap<int, vector<Site*>> vectorSizes, int **&distPlayer, int **&distMonster)
 {
@@ -655,6 +722,19 @@ vector<Site*> Player::getCorrectCycle(multimap<int, vector<Site*>> vectorSizes, 
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief Finds all possible cycles between only room sites.
+ *
+ * @par Description
+ *   Looks at each connected component, in order to determine any and all possible
+ * cycles between only room sites.
+ *
+ * @param[in] adjConn - Contains all of the connected components composed
+ * ONLY of room sites.
+ *
+ * @return All possible cycles between ONLY room sites.
+ ******************************************************************************/
 
 multimap<Site*, vector<Site*>> Player::findAllRoomCycles(map<Site*, vector<Site*>> adjConn)
 {
@@ -718,6 +798,20 @@ multimap<Site*, vector<Site*>> Player::findAllRoomCycles(map<Site*, vector<Site*
     return cycle;
 
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief Removes all room sites that are diagonal.
+ *
+ * @par Description
+ *  	Removes all room sites that are diagonal.
+ *
+ * @param[in] A vector containing room sites.
+ *
+ * @return A vector containing room sites that don't have room sites diagonal
+ * to them.
+ ******************************************************************************/
 
 
 vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
@@ -799,6 +893,21 @@ vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief Determine if a site is adjacent to a wall on the perimeter of the playfield.
+ *
+ * @par Description
+ *   Checks the entire perimeter of the playfield to see if the site in quesion is
+ * adjacent to any of these walls on the perimeter of the playfield if they exist.
+ *
+ * @param[in] A site to determine if it's adjacent to any walls on the perimeter.
+ *
+ * @return true if the site is adjacent to any perimeter walls.
+ * @return false if the site is not adjacent to any perimeter walls.
+ ******************************************************************************/
+
 bool Player::checkPerimeterForAdjWalls(Site* site)
 {
     int i = site->i();
@@ -819,9 +928,6 @@ bool Player::checkPerimeterForAdjWalls(Site* site)
     if (i == N - 1 && j == 0)
         if (playfield->isWall(i - 1, j) || playfield->isWall(i - 1, j - 1) || playfield->isWall(i, j - 1))
             return true;
-
-
-
 
     if (i == 0)
     {
@@ -862,6 +968,24 @@ bool Player::checkPerimeterForAdjWalls(Site* site)
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief Finds shortest path to a site on the playfield.
+ *
+ * @par Description
+ *   An extremely useful function used to find the shortest path to the site nextMove.
+ *
+ * @param[in] nextMove - Any site on the playfield which the player wants to move to.
+ * @param[in, out] distPlayer - The shortest distance from the player to any site
+ * on the playfield.
+ * @param[in, out] prevPlayer - The locations containing the shortest path to any
+ * site on the playfield.
+ * @param[in] player - The site which the player is currently located on.
+ *
+ * @return An adjacent square to the player, but is located along the shortest path
+ * to the nextMove site.
+ ******************************************************************************/
+
 Site* Player::calculateFinalDestination(Site* nextMove, int**&distPlayer, Site* **&prevPlayer, const Site* player)
 {
     unsigned int i;
@@ -900,6 +1024,24 @@ Site* Player::calculateFinalDestination(Site* nextMove, int**&distPlayer, Site* 
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief Used to run away from the monster as a last resort.
+ *
+ * @par Description
+ *   Looks at all of the possible sites the player can reach before the monster can.
+ *   Stores these, then takes the path to the site which is the farthest away from
+ *   the monster.
+ *
+ * @param[in, out] distMonster - Contains all of the shortest distances from the 
+ * monster to any site on the playfield.
+ * @param[in, out] distPlayer - Contains all of the shortest distances from the
+ * player to any site on the playfield.
+ *
+ * @return The player's next move.
+ ******************************************************************************/
+
 Site* Player::stayAliveAsLongAsPossible(int **&distMonster, int **&distPlayer)
 {
     Site* nextMove = nullptr;
@@ -928,6 +1070,20 @@ Site* Player::stayAliveAsLongAsPossible(int **&distMonster, int **&distPlayer)
     return nextMove;
 
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief This function takes in a EMPTY vector and stores every site on the playfield
+ * into that vector.
+ *
+ * @par Description
+ *   Stores all corridors on the playfield into a vector.
+ *
+ * @param[in] cycleBetweenRooms - Contains connected components of corridors.
+ * @param[in] adj - 
+ *
+ * @return A vector containing every corridor site on the playfield.
+ ******************************************************************************/
 
 Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms, map<Site*, vector<Site*>> adj, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
 {
