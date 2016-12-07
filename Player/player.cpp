@@ -861,6 +861,7 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
 
         if (nextMove == nullptr)
         {
+
             if (corridors.size() > 1)
             {
                 vectIt = corridors.begin();
@@ -1713,7 +1714,7 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 			i = (*vectIt)->i();
 			j = (*vectIt)->j();
 
-			if (distPlayer[i][j] < distMonster[i][j])
+			if (distPlayer[i][j] <= distMonster[i][j])
 				return nullptr;
 
 			vectIt++;
@@ -1752,8 +1753,6 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
 
 
     removeDeadEndVertices(adjDisc);
-
-
 
     if (adjDisc.size() == 0)
     {
@@ -2497,7 +2496,7 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
 			i = (*vectIt)->i();
 			j = (*vectIt)->j();
 
-			if (distPlayer[i][j] < distMonster[i][j])
+			if (distPlayer[i][j] <= distMonster[i][j])
 				corridorCycle = true;
 
 			vectIt++;
