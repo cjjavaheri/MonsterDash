@@ -61,11 +61,35 @@
 
 using namespace std;
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function is a constructor for a player object. It initializes the
+ * playfield as well as the size of the playfield.
+ *
+ ******************************************************************************/
+
 Player::Player(Playfield* p)
 {
     playfield = p;
     N = playfield->size();
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function returns the next move the player wants to make. The move must
+ * be a legal move according to the rules of the game. The player can only move
+ * one site at a time to an adjacent site. The directions are dependent on if
+ * the site is a corridor or a room.
+ *
+ *
+ * @return The site that the player wants to move to next.
+ ******************************************************************************/
 
 const Site* Player::move()
 {
@@ -807,7 +831,7 @@ multimap<Site*, vector<Site*>> Player::findAllRoomCycles(map<Site*, vector<Site*
  * @par Description
  *  	Removes all room sites that are diagonal.
  *
- * @param[in] A vector containing room sites.
+ * @param[in] roomCycle - A vector containing room sites.
  *
  * @return A vector containing room sites that don't have room sites diagonal
  * to them.
@@ -902,7 +926,7 @@ vector<Site*> Player::removeDiagonalRooms(vector<Site*> roomCycle)
  *   Checks the entire perimeter of the playfield to see if the site in quesion is
  * adjacent to any of these walls on the perimeter of the playfield if they exist.
  *
- * @param[in] A site to determine if it's adjacent to any walls on the perimeter.
+ * @param[in] site - A site to determine if it's adjacent to any walls on the perimeter.
  *
  * @return true if the site is adjacent to any perimeter walls.
  * @return false if the site is not adjacent to any perimeter walls.
@@ -1073,14 +1097,24 @@ Site* Player::stayAliveAsLongAsPossible(int **&distMonster, int **&distPlayer)
 
 /***************************************************************************//**
  * @author Cameron Javaheri
- * @brief This function takes in a EMPTY vector and stores every site on the playfield
- * into that vector.
+ * @brief Finds cycles between connected components of corridors and rooms.
  *
  * @par Description
- *   Stores all corridors on the playfield into a vector.
+ *   This function finds a cycle between connected components of corridor sites
+ * and rooms. Therefore, the player may traverse the connected component, go through a
+ * room, traverse another connected component, go through another room, etc, etc until it's
+ * traversing a cycle.
  *
  * @param[in] cycleBetweenRooms - Contains connected components of corridors.
- * @param[in] adj - 
+ * @param[in] adj - The adjacency list for ALL corridors on the playfield.
+ * @param[in, out] distMonster - The shortest distance from the monster
+ * to any site on the playfield.
+ * @param[in, out] distPlayer - The shortest distance from the player
+ * to any site on the playfield.
+ * @param[in, out] prevPlayer - The locations obtained from b.f.s. done on 
+ * the player.
+ * @param[in] player - The site which the player is currently on.
+ * @param[in] monster - The site which the monster is currently on.
  *
  * @return A vector containing every corridor site on the playfield.
  ******************************************************************************/
@@ -1255,6 +1289,25 @@ Site* Player::findCyclesBetweenRooms(map<Site*, vector<Site*>> cycleBetweenRooms
     return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ * @brief Determines if player is in cycle between rooms and connected components.
+ *
+ * @par Description
+ *  Determine whether or not the player is currently on a site which belongs
+ * to a connected component that creates a cycle in the graph between rooms
+ * and connected components.
+ *
+ * @param[in] cycleBetweenRooms - All of the connected components which create
+ * cycles between themselves and rooms.
+ * @param[in] player - The site which the player is currently standing on.
+ *
+ * @return true if the player is on one of the connected componoents in the cycle.
+ * @return false if the player is not on of the connected components in the cycle.
+ ******************************************************************************/
+
 bool Player::isPlayerInConnectedRoomCycle(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player)
 {
     map<Site*, vector<Site*>>::iterator it;
@@ -1285,6 +1338,29 @@ bool Player::isPlayerInConnectedRoomCycle(map<Site*, vector<Site*>> cycleBetween
     return false;
 
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function tries to make the best decision it can when the player is
+ * on a connected component. For example, it has to make sure it does not 
+ * turn around when the monster is chasing right behind it, and it has to make
+ * sure that it chooses a path that has a way out (no dead ends). Therefore,
+ * in summary, this function chooses the best path it can when the player is located
+ * on a connected component.
+ *
+ * @param[in] cycleBetweenRooms - All of the connected components which create
+ * cycles between themselves and rooms.
+ * @param[in, out] distPlayer - The shortest distance from the player to any
+ * site on the graph.
+ * @param[in, out] distMonster - The shortest distance from the monster to any
+ * site on the graph.
+ * @param[in] player - The site the player is currently standing on.
+ *
+ * @return The next move the player should make.
+ ******************************************************************************/
 
 Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, int **&distPlayer,  int **&distMonster, const Site* player)
 {
@@ -1413,6 +1489,23 @@ Site* Player::chooseNextCorridor(map<Site*, vector<Site*>> cycleBetweenRooms, in
     return nextMove;
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function sees which adjacent corridor site the player can reach
+ * before the monster can.
+ *
+ * @param[in] player - The site the player is currently on.
+ * @param[in, out] distMonster - The distance from the monster to any site.
+ *
+ * @return The adjacent corridor site which the monster can't reach.
+ ******************************************************************************/
+
+
+
 Site* Player::scanAdjacentCorridorSites(const Site* player, int **&distMonster)
 {
     Site* nextMove = nullptr;
@@ -1470,6 +1563,25 @@ Site* Player::scanAdjacentCorridorSites(const Site* player, int **&distMonster)
 
     return nextMove;
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function searches the current room the player is in to get the adjacent
+ * corridors to the room. It deletes all of the corridor sites that are not apart of
+ * the cycle between connected components and rooms.
+ *
+ * @param[in] cycleBetweenRooms - All of the connected components which create
+ * cycles between themselves and rooms.
+ * @param[in] player - The current site the player is standing on.
+ *
+ *
+ * @return A vector containing valid corridor sites to move to that are
+ * adjacent to the room the player is located in.
+ ******************************************************************************/
 
 vector<Site*> Player::getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player )
 {
@@ -1541,17 +1653,29 @@ vector<Site*> Player::getCycleChoices(map<Site*, vector<Site*>> cycleBetweenRoom
 
     }
 
-    
-    vectIt = corridors.begin();
-    while (vectIt != corridors.end())
-    {
-      
-        vectIt++;
-    }
+
     return corridors;
 
 
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function scans the room starting at the bottom right. It moves along
+ * the perimeter of the room, looking for corridor sites that are adjacent to
+ * the room itself.
+ *
+ * @param[in, out] vectDisc - A vector to store the the corridors adjacent
+ * to the room.
+ * @param[in] site - The site to start searching from.
+ * @param[in, out] - The ith coordinate to start searching from.
+ * @param[in, out] - The jth coordinate to start searching from.
+ *
+ ******************************************************************************/
 
 
 void Player::searchAllAdjCorrSites(vector<Site*> &vectDisc, Site* site, int &i, int &j)
@@ -1628,6 +1752,23 @@ void Player::searchAllAdjCorrSites(vector<Site*> &vectDisc, Site* site, int &i, 
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function looks at connected components, and determines if a connected
+ * component leads to a dead end. This is determined by simply looking to see
+ * if there's both a way in and a way out. This means that there has to be at
+ * least 2 adjacent room sites to the connected component. If not, it's a dead end.
+ *
+ * @param[in] adjConn - A map containing a representative, and the list of vertices
+ * in the connected component.
+ *
+ * @return All of the valid connected components, i.e. no connected components
+ * with dead ends.
+ ******************************************************************************/
+
 map<Site*,vector<Site*>> Player::checkForConnectedDeadEnds(map<Site*, vector<Site*>> adjConn)
 {
     map<Site*, vector<Site*>>::iterator it;
@@ -1668,6 +1809,20 @@ map<Site*,vector<Site*>> Player::checkForConnectedDeadEnds(map<Site*, vector<Sit
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function deteremines if a particular site has a room in a direction N, S,
+ * E, or W.
+ *
+ * @param[in] site - Any site that needs to be determined if rooms are adjacent to it.
+ *
+ * @return true if the site has a room site adjacent to it.
+ * @return false if the site does not have a room site adjacent to it.
+ ******************************************************************************/
+
 bool Player::hasAdjacentRoom(Site* site)
 {
     int i = site->i();
@@ -1688,6 +1843,20 @@ bool Player::hasAdjacentRoom(Site* site)
     return false;
 
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  Performs a depth first search on the graph in order to find the connected
+ * components of corridor sites.
+ *
+ * @param[in] adj - An adjacency list containing corridor sites.
+ *
+ * @return The connected components along with their representatives.
+ ******************************************************************************/
 
 map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site*>> adj)
 {
@@ -1764,27 +1933,23 @@ map<Site*, vector<Site*>> Player::findConnectedComponents(map<Site*, vector<Site
 
     }
 
-    /*
-    it = adjConn.begin();
-    while (it != adjConn.end())
-    {
-    	
-    	
-    	vectIt = it->second.begin();
-    	while (vectIt != it->second.end())
-    	{
-    		
-    		vectIt++;
-    	}
-    	
-    	it++;
-    }
-    */
-
     freeMarkedArray(marked);
     return adjConn;
 
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function frees up the memory allocated for a 2D array consisting of
+ * booleans used to mark whether a vertex has been visited or not.
+ *
+ * @param[in, out] marked - The 2D array that needs to be freed up.
+ *
+ ******************************************************************************/
 
 void Player::freeMarkedArray(bool **&marked)
 {
@@ -1798,6 +1963,20 @@ void Player::freeMarkedArray(bool **&marked)
 }
 
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function finds cycles between ONLY corridor sites. It looks at all of 
+ * the connected components, and removes any and all vertices which are not
+ * a part of the cycle.
+ *
+ * @param[in] adjConn - All of the connected components which create
+ * cycles between corridor sites.
+ *
+ * @return A map containing cycles between ONLY corridor sites.
+ ******************************************************************************/
 
 map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Site*>> adjConn)
 {
@@ -1868,6 +2047,22 @@ map<Site*, vector<Site*>> Player::getCyclesWithinCorridors(map<Site*, vector<Sit
 }
 
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function looks at all sites that only have 1 adjacent site. It
+ * continues to delete these sites from a particular cycle until the
+ * cycle only contains vertices with 2 adjacent sites. In other words,
+ * it is a technique for removing dead ends in cycles.
+ *
+ * @param[in] myvector - A cycle that has dead ends.
+ *
+ * @return A cycle without dead ends.
+ ******************************************************************************/
+
+
 vector<Site*> Player::removeSitesWithOneAdjacentSite(vector<Site*> myvector)
 {
     map<Site*, vector<Site*>>::iterator it;
@@ -1936,6 +2131,22 @@ vector<Site*> Player::removeSitesWithOneAdjacentSite(vector<Site*> myvector)
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This is a helper function for the search function. All it does is
+ * set i and j to the bottom right of the room in order to start searching.
+ *
+ * @param[in, out] i - The initial x-coordinate.
+ * @param[in, out] j - The initial y-coordinate.
+ *
+ ******************************************************************************/
+
+
+
+
 void Player::setCoordinates(int &i, int &j)
 {
     if (playfield->isRoom(i, j))
@@ -1952,6 +2163,21 @@ void Player::setCoordinates(int &i, int &j)
     }
 
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function simply looks for ANY room site that's adjacent to a particular
+ * site. It returns this adjacent room site.
+ *
+ * @param[in] site - The site which the user needs to see if it has an adjacent
+ * room site.
+ *
+ * @return The adjacent room site.
+ ******************************************************************************/
 
 Site* Player::getAdjacentRoomSite(Site* site)
 {
@@ -1990,6 +2216,17 @@ Site* Player::getAdjacentRoomSite(Site* site)
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function creates a 2D array of bools and initializes them all to false.
+ *
+ * @param[in, out] marked - The 2D array of bools. Must be sent in null.
+ *
+ ******************************************************************************/
+
 
 void Player::getMarkedArray(bool **&marked)
 {
@@ -2006,6 +2243,35 @@ void Player::getMarkedArray(bool **&marked)
         for (j = 0; j < N; j++)
             marked[i][j] = false;
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function looks at a connected cycle first. If it can reach a connected
+ * cycle before the monster can, it calculates a path to that cycle. If it can't
+ * then it finds a cycle between disconnected corridor sites. It then runs
+ * around rooms travelling from disconnected corridor site to disconnected
+ * corridor site.
+ *
+ * @param[in, out] adjDisc - The adjacency list containing corridor sites that
+ * are not connected components. They are simply corridor sites with no adjacent
+ * corridor vertices, but their adjacency list is treated as one.
+ * @param[in, out] distMonster - The distance from the monster to any site on
+ * the playfield.
+ * @param[in, out] distPlayer - The distance from the player to any site on
+ * the playfield.
+ * @param[in, out] prevPlayer - Locations obtained from breadth first search
+ * for player.
+ * @param[in] player - The site the player is on.
+ * @param[in] monster - The site the monster is on.
+ * @param[in] connectedCycle - All of the cycles containing ONLY corridor
+ * sites in them.
+ *
+ * @return The player's next move.
+ ******************************************************************************/
 
 Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distMonster, int**&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster, map<Site*, vector<Site*>> connectedCycle)
 {
@@ -2158,6 +2424,30 @@ Site* Player::calculateNextRoom(map<Site*, vector<Site*>> &adjDisc, int **&distM
     return calculateFinalDestination(nearestCorr, distPlayer, prevPlayer, player);
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function is called when the monster is right behind the player The idea
+ * is to make the player run away from the monster by plotting a safe path instead
+ * of just running away blindly. It looks at all of the adjacent disconnected
+ * corridor sites of a room, and plots a path to whichever one has the highest
+ * number of adjacent vertices.
+ *
+ * @param[in] player - The site the player is on.
+ * @param[in, out] nearestCorr - The nearest corridor site that is adjacent
+ * to the current room which the player should plot a path to.
+ * @param[in, out] distPlayer - Distance to any site from player.
+ * @param[in, out] distMonster - Distance to any site from monster.
+ * @param[in, out] cycle - A vector used to store previous monster/player
+ * decisions so that the player does not suddenly turn around and run
+ * into the monster.
+ * @param[in, out] adjDisc - The adjacency list for disconnected corridor sites.
+ *
+ ******************************************************************************/
+
 void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int **&distMonster, vector<Site*> &cycle, map<Site*, vector<Site*>> &adjDisc)
 {
     int i = player->i();
@@ -2304,6 +2594,20 @@ void Player::run(const Site* player, Site* &nearestCorr, int **&distPlayer, int 
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function is designed to remove any vertices that have 1 or less than 1
+ * adjacent vertices. This function only applies to disconnected corridor sites
+ * (corridor sites that don't have ANY adjacent corridor sites).
+ *
+ * @param[in, out] adjDisc - The adjacency list for disconnected corridor sites.
+ *
+ ******************************************************************************/
+
 void Player::removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc)
 {
     map<Site*, vector<Site*>>::iterator it;
@@ -2383,6 +2687,20 @@ void Player::removeDeadEndVertices(map<Site*, vector<Site*>> &adjDisc)
 
 
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function gets the adjacency list for disconnected corridor sites(sites that
+ * don't have any adjacent corridor sites.
+ *
+ * @param[in, out] adj - The adjacency list for ALL corridor sites.
+ * @param[in, out] allocatedMemory - A vector to store any memory allocated.
+ *
+ * @return The adjacency list for disconnected corridor sites.
+ ******************************************************************************/
 
 map<Site*, vector<Site*>> Player::getAdjListDisc(map<Site*, vector<Site*>> &adj, vector<Site*> &allocatedMemory)
 {
@@ -2514,6 +2832,20 @@ map<Site*, vector<Site*>> Player::getAdjListDisc(map<Site*, vector<Site*>> &adj,
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function deletes the corridor site the player is standing on
+ * from the list of decisions the player has to make.
+ *
+ * @param[in, out] vectDisc - A vector containing the disconnected corridor sites.
+ * @param[in] site - The site to make sure is not included in the disconnected
+ * corridor site list.
+ ******************************************************************************/
+
 void Player::checkDuplicates(vector<Site*> &vectDisc, Site* site)
 {
     // Check to make sure that the current corridor site the player
@@ -2533,6 +2865,21 @@ void Player::checkDuplicates(vector<Site*> &vectDisc, Site* site)
 
 
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function searches the perimeter of the room starting from the bottom
+ * right. It works its way left, then up, then right, then back down.
+
+ * @param[in, out] vectDisc - A vector of disconnected corridor sites.
+ * @param [in] site - The site the player is on.
+ * @param[in, out] i - The x-coordinate the player is currently standing on.
+ * @param[in, out] j - The y-coordinate the player is currently standing on.
+ *
+ ******************************************************************************/
 
 void Player::search(vector<Site*> &vectDisc, Site* site, int &i, int &j)
 {
@@ -2674,6 +3021,21 @@ void Player::search(vector<Site*> &vectDisc, Site* site, int &i, int &j)
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function removes disconnected corridor sites that only have 1 adjacent
+ * site.
+ *
+ * @param[in, out] adj - The adjacency list for ALL corridors.
+ *
+ * @return The adjacency list without disconnected corridor sites that only have
+ * 1 adjacent corridor site.
+ ******************************************************************************/
+
 void Player::removeDeadEnds(map<Site*, vector<Site*>> &adj)
 {
     map<Site*, vector<Site*>>::iterator it;
@@ -2730,6 +3092,20 @@ void Player::removeDeadEnds(map<Site*, vector<Site*>> &adj)
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function counts disconnected corridor sites (sites that don't have any
+ * adjacent corridor sites.)
+ *
+ * @param[in, out] adj - The adjacency list for ALL corridor sites.
+ *
+ * @return The number of disconnected corridor sites.
+ ******************************************************************************/
+
 int Player::countDisconnectedComponents(map<Site*, vector<Site*>> &adj)
 {
     int count = 0;
@@ -2748,6 +3124,17 @@ int Player::countDisconnectedComponents(map<Site*, vector<Site*>> &adj)
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function determines if the playfield has walls or not.
+ *
+ *
+ * @return true if there are walls.
+ * @return false if there are no walls.
+ ******************************************************************************/
 
 bool Player::doWallsExist()
 {
@@ -2764,6 +3151,18 @@ bool Player::doWallsExist()
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function determines if the playfield has corridors in it or not.
+ *
+ *
+ * @return true if the playfield has corridors.
+ * @return false if there are no corridors.
+ ******************************************************************************/
+
 bool Player::doCorridorsExist()
 {
     int i;
@@ -2778,6 +3177,37 @@ bool Player::doCorridorsExist()
     return corridors;
 
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function determines a path to a cycle that contains ONLY corridor
+ * sites in it. It first checks to see if there's a cycle between connected
+ * components. If there is no cycle between connected components and rooms,
+ * it first determines whether or not a player is already in the cycle
+ * between only corridor sites. If it's not, then find a path to a cycle
+ * that the player can reach before the monster can. If the player is
+ * already in a cycle, then determine a site that's adjacent to the player
+ * that's also in the cycle and that's the farthest distance away from
+ * the monster.
+ *
+ * @param[in] connectedCycle - A map containing all of the cycles between
+ * ONLY corridor sites.
+ * @param[in] adjConn - The adjacency list between connected components.
+ * @param[in, out] distMonster - The distance from the monster to any site on
+ * the playfield.
+ * @param[in, out] distPlayer - The distance from the player to any site on
+ * the playfield.
+ * @param[in, out] prevPlayer - The paths from the player to any site on 
+ * the playfield.
+ * @param[in] player - The site the player is currently on.
+ * @param[in] monster - The site the monster is currently on.
+ *
+ * @return a site containing the player's next move.
+ ******************************************************************************/
 
 Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Site*, vector<Site*>> adjConn, int **&distMonster, int **&distPlayer, Site* **&prevPlayer, const Site* player, const Site* monster)
 {
@@ -3081,6 +3511,23 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
 
 }
 
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function determines if the playfield is in a cycle consisting of
+ * ONLY corridor sites.
+ *
+ * @param[in] connectedCycle - The map containing the connected cycle consisting
+ * of only corridor sites.
+ * @param[in] player - The site the player is currently standing on.
+ *
+ * @return true if the player is in a cycle consisting of only corridor sites.
+ * @return false if the player is not in a cycle consisting of only corridor sites.
+ ******************************************************************************/
+
 bool Player::isPlayerInCorridorCycle(map<Site*, vector<Site*>> connectedCycle, const Site* player)
 {
     map<Site*, vector<Site*>>::iterator it;
@@ -3111,6 +3558,21 @@ bool Player::isPlayerInCorridorCycle(map<Site*, vector<Site*>> connectedCycle, c
     return false;
 
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  This function performs a breadth first on the player.
+ *
+ * @param[in, out] marked - A 2D array of bools used to mark the playfield.
+ * @param[in, out] dist - The 2D array used to keep track of distances
+ * to certain sites on the playfield.
+ * @param[in] player - The site the player is currently located on.
+ * @param[in, out] allocatedMemory - Any memory allocated is stored in this vector.
+ *
+ ******************************************************************************/
 
 
 void Player::bfs(bool **&marked, Site* **&prev, int **&dist, const Site* player, vector<Site*> &allocatedMemory)
@@ -3148,6 +3610,25 @@ void Player::bfs(bool **&marked, Site* **&prev, int **&dist, const Site* player,
     allocatedMemory.push_back(playerSite);
 
 }
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  A helper function for the bfs. Used to store sites that are N, S, E, or W.
+ * Calculates previous sites and distances using breadth first search.
+ *
+ * @param[in, out]  marked - A 2D array containing bools. Marked true if the player can
+ * reach a specific location.
+ * @param[in, out]  prev - Stores the path to any site on the playfield.
+ * @param[in, out]  dist - The shortest distances to a particular site on the playfield.
+ * @param[in, out]  myqueue - A queue used for breadth first search.
+ * @param[in] temp - The site that the breadth first search is currently examining.
+ * @param[in, out] allocatedMemory - The vector used to store any memory that was
+ * allocated.
+ *
+ ******************************************************************************/
 
 void Player::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **dist, queue<Site*> &myqueue, Site* temp, vector<Site*> &allocatedMemory)
 {
@@ -3231,6 +3712,29 @@ void Player::checkAdjacentCorridorSquares(bool **marked, Site* **prev, int **dis
     }
 
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  A helper function for the bfs. Used to store room sites that are NE, NW, SE, SW.
+ * Calculates previous sites and distances using breadth first search.
+ * 
+ *
+ * @param[in, out]  marked - A 2D array containing bools. Marked true if the player can
+ * reach a specific location.
+ * @param[in, out]  prev - Stores the path to any site on the playfield.
+ * @param[in, out]  dist - The shortest distances to a particular site on the playfield.
+ * @param[in, out]  myqueue - A queue used for breadth first search.
+ * @param[in] temp -  The site that the breadth first search is currently examining.
+ * @param[in, out] allocatedMemory - The vector used to store any memory that was
+ * allocated.
+ *
+ ******************************************************************************/
+
+
 
 void Player::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, queue<Site*> &myqueue, Site* temp, vector<Site*> &allocatedMemory)
 {
@@ -3319,6 +3823,23 @@ void Player::checkAdjacentRoomSquares(bool **marked, Site* **prev, int **dist, q
 
 }
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  A function used to deallocate memory used during the program.
+ *
+ * @param[in, out] markedMonster - The marked array for monster.
+ * @param[in, out] prevMonster - The locations to sites from monster.
+ * @param[in, out] distMonster - Shortest distances to sites from monster.
+ * @param[in, out] markedPlayer - The marked array for player.
+ * @param[in, out] prevPlayer - The locations to sites from the player.
+ * @param[in, out] distPlayer - The distances from the player to different sites.
+ * @param[in, out] allocatedMemory - A vector containing allocated memory.
+ *
+ ******************************************************************************/
+
 void Player::deallocateStorage(bool **&markedMonster, Site* **&prevMonster, int **&distMonster, bool **&markedPlayer, Site* **&prevPlayer, int **&distPlayer, vector<Site*> &allocatedMemory)
 {
     int i;
@@ -3366,6 +3887,21 @@ void Player::deallocateStorage(bool **&markedMonster, Site* **&prevMonster, int 
     }
 
 }
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ *
+ *
+ * @par Description
+ *  A function used to allocate memory for breadth first search.
+ *
+ * @param[in, out] - marked - A 2D array containing bools. Marked true if the player can
+ * reach a specific location.
+ * @param[in, out] - prev - Stores the path to any site on the playfield.
+ * @param[in, out] - dist - The shortest distances to a particular site on the playfield.
+ *
+ ******************************************************************************/
 
 void Player::allocateStorage(bool **&marked, Site* **&prev, int **&dist)
 {

@@ -6,6 +6,14 @@
 #include "playfield.h"
 #include <queue>
 
+
+/***************************************************************************//**
+ * @class Player
+ *
+ * @brief A class used to create a monster.
+ *
+ ******************************************************************************/
+
 class Monster 
 {
     Playfield* playfield;
