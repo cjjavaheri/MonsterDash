@@ -3348,6 +3348,28 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
 
                     it++;
                 }
+
+
+		// If that doesn't work, calculate shortest path to cycle.
+		it = connectedCycle.begin();
+                while (it != connectedCycle.end())
+                {
+                    vectIt = it->second.begin();
+                    shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+                    nextMove = *vectIt;
+                    while (vectIt != it->second.end())
+                    {
+                        if (distPlayer[(*vectIt)->i()][(*vectIt)->j()] < shortestDist)
+                        {
+                            shortestDist = distPlayer[(*vectIt)->i()][(*vectIt)->j()];
+                            nextMove = *vectIt;
+                        }
+
+                        vectIt++;
+                    }
+
+                    it++;
+                }
             }
 
             else
