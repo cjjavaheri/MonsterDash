@@ -315,6 +315,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     nextMove = new Site(player->i(), player->j());
     allocatedMemory.push_back(nextMove);
 
+
     hasCorridors = doCorridorsExist();
 
     if (!hasCorridors)
@@ -327,7 +328,9 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
             hasWalls = doWallsExist();
             if (!hasWalls)
             {
+                // Attempt to stay alive as long as possible.
                 nextMove = stayAliveAsLongAsPossible(distMonster, distPlayer);
+                monsterTooClose(distMonster, distPlayer, nextMove, player, monster);
                 return calculateFinalDestination(nextMove, distPlayer, prevPlayer, player);
             }
 
@@ -344,6 +347,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
 
 
+    // Try to find a cycle.
     if (adjConn.empty())
         adjConn = findConnectedComponents(adj);
 
@@ -364,6 +368,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
 
         if (disc != 0)
         {
+            // Find cycle between rooms and disconnected components.
             adjDisc = getAdjListDisc(adj, allocatedMemory);
             nextMove =  calculateNextRoom(adjDisc, distMonster, distPlayer, prevPlayer, player, monster, connectedCycle);
             if (nextMove != nullptr)
@@ -376,6 +381,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
     }
 
 
+    // Find cycle between only corridors.
     if (!connectedCycle.empty())
     {
         adjConn = checkForConnectedDeadEnds(adjConn);
@@ -386,7 +392,7 @@ Site* Player::getNextMove(bool **&markedMonster, Site* **&prevMonster, int **&di
             return nextMove;
     }
 
-
+    // Find cycles between rooms and connected components.
     adjConn = checkForConnectedDeadEnds(adjConn);
     nextMove = findCyclesBetweenRooms(adjConn, adj, distMonster, distPlayer, prevPlayer, player, monster);
 
@@ -1093,9 +1099,13 @@ Site* Player::stayAliveAsLongAsPossible(int **&distMonster, int **&distPlayer)
             }
         }
 
-    it = decisions.end();
-    it--;
-    nextMove = it->second;
+    if (!decisions.empty())
+    {
+        it = decisions.end();
+        it--;
+        nextMove = it->second;
+    }
+
     return nextMove;
 
 }
@@ -3350,8 +3360,8 @@ Site* Player::findCorridorCycle(map<Site*, vector<Site*>> connectedCycle, map<Si
                 }
 
 
-		// If that doesn't work, calculate shortest path to cycle.
-		it = connectedCycle.begin();
+                // If that doesn't work, calculate shortest path to cycle.
+                it = connectedCycle.begin();
                 while (it != connectedCycle.end())
                 {
                     vectIt = it->second.begin();
@@ -3959,6 +3969,66 @@ void Player::allocateStorage(bool **&marked, Site* **&prev, int **&dist)
     for (i = 0; i < N; i++)
         for (j = 0; j < N; j++)
             marked[i][j] = false;
+
+
+}
+
+
+
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief This function attempts to trick the monster on maps like blank.in
+ *
+ * @par Description
+ *   This function determines the monster's ith coordinate, then makes a decision
+ * 	to move to the farthest ith coordinate away from the monster, and the middle
+ * 	jth coordinate of the map, moves there, then calculates the farthest distance
+ *	away from the monster, and moves to that location.
+ * @param[in, out] distMonster - A 2D array containing the shortest distances
+ * to every site from the monster.
+ * @param[in, out] distPlayer - A 2D array containing the shortest distances to
+ * every site from the player.
+ * @param[in, out] nextMove - The location the monster should calculate a path
+ *	to.
+ *
+ * @param[in] player - The site the player is currently located on.
+ * @param[in] monster - The site the monster is currently located on.
+ *
+ ******************************************************************************/
+
+void Player::monsterTooClose(int **&distMonster, int **&distPlayer, Site* &nextMove, const Site* player, const Site* monster)
+{
+
+
+    static bool reached = false;
+    static Site* test = nullptr;
+
+    // Attempt to plot a path towards the middle jth coordinate
+    // but farthest ith coordinate away from the monster.
+
+    if (!reached)
+    {
+        if (monster->i() < player->i())
+        {
+            test = new Site(N - 1, (N - 1) / 2);
+        }
+
+        else if (monster->i() > player->i())
+        {
+            test = new Site(0 , (N - 1) / 2);
+        }
+
+        if (test != nullptr)
+        {
+            if (player->i() == test->i() && player->j() == test->j())
+                reached = true;
+
+        }
+
+        if (!reached && test != nullptr)
+            nextMove = test;
+
+    }
 
 
 }

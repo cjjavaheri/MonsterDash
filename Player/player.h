@@ -195,7 +195,8 @@ public:
     /// Determine if the player has reached the cycle between ONLY room sites.
     bool isPlayerInConnectedRoomCycle(map<Site*, vector<Site*>> cycleBetweenRooms, const Site* player);
 
-
+    /// Determine if the player can trick the monster on maps like blank.in
+    void monsterTooClose(int **&distMonster, int **&distPlayer, Site* &nextMove, const Site* player, const Site* monster);
 
 };
 #endif
