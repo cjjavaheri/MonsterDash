@@ -638,6 +638,8 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
     int i;
     int j;
 
+
+    // If cycle is empty, find a cycle between only room sites.
     if (roomCycle.empty())
     {
 
@@ -669,7 +671,7 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
 
         roomCycle = removeSitesWithOneAdjacentSite(roomCycle);
 
-	checkWalls(roomCycle);
+        checkWalls(roomCycle);
 
     }
 
@@ -678,117 +680,133 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
 }
 
 
+/***************************************************************************//**
+ * @author Cameron Javaheri
+ * @brief Deletes unnecessary moves from a player's list of decisions.
+ *
+ * @par Description
+ *   The function looks at all of the walls on the playfield, and then decides
+ *	which walls have 8 adjacent room sites. It then deletes these sites
+ *	from the player's list of decisions.
+ *
+ * @param[in, out] roomCycle - A cycle of all of the room sites.
+ *
+ *
+ ******************************************************************************/
+
 void Player::checkWalls(vector<Site*> &roomCycle)
 {
-	unsigned int i;
-	unsigned int j;
-	int a;
-	int b;
-	int counter;
-	vector<Site*> walls;
-	vector<Site*>::iterator vectIt;
-	vector<Site*>::iterator roomIt;
-	vector<Site*>::iterator erase;
-	Site* site;
+    unsigned int i;
+    unsigned int j;
+    int a;
+    int b;
+    int counter;
+    vector<Site*> walls;
+    vector<Site*>::iterator vectIt;
+    vector<Site*>::iterator roomIt;
+    vector<Site*>::iterator erase;
+    Site* site;
 
-	for (a = 0; a < N; a++)
-		for (b = 0; b < N; b++)
-			if (playfield->isWall(a, b))
-			{
-				site = new Site(a, b);
-				walls.push_back(site);
-			}
-			
-				
-	vectIt = walls.begin();
-	while (vectIt != walls.end())
-	{
-
-		counter = 0;
-		roomIt = roomCycle.begin();
-		while (roomIt != roomCycle.end())
-		{
-			i = (*vectIt)->i();
-			j = (*vectIt)->j();
+    for (a = 0; a < N; a++)
+        for (b = 0; b < N; b++)
+            if (playfield->isWall(a, b))
+            {
+                site = new Site(a, b);
+                walls.push_back(site);
+            }
 
 
-			if (i + 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
-				counter++;
+    vectIt = walls.begin();
+    while (vectIt != walls.end())
+    {
+
+        counter = 0;
+        roomIt = roomCycle.begin();
+        while (roomIt != roomCycle.end())
+        {
+            i = (*vectIt)->i();
+            j = (*vectIt)->j();
 
 
-			if (i + 1 == (*roomIt)->i() && j  == (*roomIt)->j())
-				counter++;
+            // Check all 8 adjacent sites.
+            if (i + 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+                counter++;
 
 
-			if (i + 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
-				counter++;
+            if (i + 1 == (*roomIt)->i() && j  == (*roomIt)->j())
+                counter++;
 
 
-			if (i == (*roomIt)->i() && j + 1 == (*roomIt)->j())
-				counter++;
+            if (i + 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+                counter++;
 
 
-			if (i == (*roomIt)->i() && j - 1 == (*roomIt)->j())
-				counter++;
+            if (i == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+                counter++;
 
 
-			if (i - 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
-				counter++;
+            if (i == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+                counter++;
 
 
-			if (i - 1 == (*roomIt)->i() && j == (*roomIt)->j())
-				counter++;
-
-			if (i - 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
-				counter++;
+            if (i - 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+                counter++;
 
 
+            if (i - 1 == (*roomIt)->i() && j == (*roomIt)->j())
+                counter++;
 
-			roomIt++;
-		}
-
-		if (counter >= 8)
-		{
-			roomIt = roomCycle.begin();
-			while (roomIt != roomCycle.end())
-			{
-				if (i + 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
-				{
-					erase = roomIt;
-					++roomIt;
-					roomCycle.erase(erase);
-				}
-
-				else if (i + 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
-				{
-					erase = roomIt;
-					++roomIt;
-					roomCycle.erase(erase);
-				}
+            if (i - 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+                counter++;
 
 
-				else if (i - 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
-				{
-					erase = roomIt;
-					++roomIt;
-					roomCycle.erase(erase);
-				}
+
+            roomIt++;
+        }
+
+        if (counter >= 8)
+        {
+            // Delete the vertical and horizontal sites.
+            roomIt = roomCycle.begin();
+            while (roomIt != roomCycle.end())
+            {
+                if (i + 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+                {
+                    erase = roomIt;
+                    ++roomIt;
+                    roomCycle.erase(erase);
+                }
+
+                else if (i + 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+                {
+                    erase = roomIt;
+                    ++roomIt;
+                    roomCycle.erase(erase);
+                }
 
 
-				else if (i - 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
-				{
-					erase = roomIt;
-					++roomIt;
-					roomCycle.erase(erase);
-				}
+                else if (i - 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+                {
+                    erase = roomIt;
+                    ++roomIt;
+                    roomCycle.erase(erase);
+                }
 
-				else
-					roomIt++;
-			}
-		}
 
-		vectIt++;
-	}
+                else if (i - 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+                {
+                    erase = roomIt;
+                    ++roomIt;
+                    roomCycle.erase(erase);
+                }
+
+                else
+                    roomIt++;
+            }
+        }
+
+        vectIt++;
+    }
 
 
 }

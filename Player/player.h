@@ -198,7 +198,8 @@ public:
     /// Determine if the player can trick the monster on maps like blank.in
     void monsterTooClose(int **&distMonster, int **&distPlayer, Site* &nextMove, const Site* player, const Site* monster);
 
-	void checkWalls(vector<Site*> &roomCycle);
+    /// Delete adjacent vertical and horizontal sites to walls which have 8 adjacent room sites.
+    void checkWalls(vector<Site*> &roomCycle);
 
 };
 #endif
