@@ -592,33 +592,6 @@ Site* Player::chooseNextRoom(int **&distMonster, int **&distPlayer, Site* **&pre
     }
 
 
-
-    if (nextMove->i() == player->i() && nextMove->j() == player->j())
-    {
-        decisions.clear();
-        adjRooms = findAdjRoomLists(roomCycle);
-        adjIt = adjRooms.begin();
-        while (adjIt != adjRooms.end() && (adjIt->first->i() != player->i() || adjIt->first->j() != player->j()))
-            adjIt++;
-
-        vectIt = adjIt->second.begin();
-        while (vectIt != adjIt->second.end())
-        {
-            i = (*vectIt)->i();
-            j = (*vectIt)->j();
-
-            decisions.insert({distMonster[i][j], *vectIt});
-
-            vectIt++;
-        }
-
-        decIt = decisions.end();
-        decIt--;
-
-        nextMove = decIt->second;
-    }
-
-
     return nextMove;
 
 }
@@ -696,9 +669,127 @@ Site* Player::getRoomCycle(int **&distMonster, int **&distPlayer, Site* **&prevP
 
         roomCycle = removeSitesWithOneAdjacentSite(roomCycle);
 
+	checkWalls(roomCycle);
+
     }
 
     return chooseNextRoom(distMonster, distPlayer, prevPlayer, roomCycle, player);
+
+}
+
+
+void Player::checkWalls(vector<Site*> &roomCycle)
+{
+	unsigned int i;
+	unsigned int j;
+	int a;
+	int b;
+	int counter;
+	vector<Site*> walls;
+	vector<Site*>::iterator vectIt;
+	vector<Site*>::iterator roomIt;
+	vector<Site*>::iterator erase;
+	Site* site;
+
+	for (a = 0; a < N; a++)
+		for (b = 0; b < N; b++)
+			if (playfield->isWall(a, b))
+			{
+				site = new Site(a, b);
+				walls.push_back(site);
+			}
+			
+				
+	vectIt = walls.begin();
+	while (vectIt != walls.end())
+	{
+
+		counter = 0;
+		roomIt = roomCycle.begin();
+		while (roomIt != roomCycle.end())
+		{
+			i = (*vectIt)->i();
+			j = (*vectIt)->j();
+
+
+			if (i + 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+				counter++;
+
+
+			if (i + 1 == (*roomIt)->i() && j  == (*roomIt)->j())
+				counter++;
+
+
+			if (i + 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+				counter++;
+
+
+			if (i == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+				counter++;
+
+
+			if (i == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+				counter++;
+
+
+			if (i - 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+				counter++;
+
+
+			if (i - 1 == (*roomIt)->i() && j == (*roomIt)->j())
+				counter++;
+
+			if (i - 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+				counter++;
+
+
+
+			roomIt++;
+		}
+
+		if (counter >= 8)
+		{
+			roomIt = roomCycle.begin();
+			while (roomIt != roomCycle.end())
+			{
+				if (i + 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+				{
+					erase = roomIt;
+					++roomIt;
+					roomCycle.erase(erase);
+				}
+
+				else if (i + 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+				{
+					erase = roomIt;
+					++roomIt;
+					roomCycle.erase(erase);
+				}
+
+
+				else if (i - 1 == (*roomIt)->i() && j + 1 == (*roomIt)->j())
+				{
+					erase = roomIt;
+					++roomIt;
+					roomCycle.erase(erase);
+				}
+
+
+				else if (i - 1 == (*roomIt)->i() && j - 1 == (*roomIt)->j())
+				{
+					erase = roomIt;
+					++roomIt;
+					roomCycle.erase(erase);
+				}
+
+				else
+					roomIt++;
+			}
+		}
+
+		vectIt++;
+	}
+
 
 }
 
